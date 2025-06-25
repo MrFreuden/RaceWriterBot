@@ -1,4 +1,5 @@
-﻿using RaceWriterBot.asdfadgfh;
+﻿using Moq;
+using RaceWriterBot.asdfadgfh;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -6,19 +7,31 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Temp
 {
-    public class UpdateProcessor
+    public partial class UpdateProcessor
     {
-        private readonly ITelegramBotClient _botClient;
-        private readonly UserDataStorage _dataStorage;
-        private readonly BotDataStorage _botStorage;
-        private readonly IBotMessenger _botMessenger;
+        private const int CountObjectsPerPage = 3;
+        private const string CHANNELS_PAGE = "channels";
+        private const string HASHTAGS_PAGE = "hashtags";
+        private const string MESSAGES_PAGE = "messages";
 
-        public UpdateProcessor(ITelegramBotClient botClient)
+        private readonly IUserDataStorage _userDataStorage;
+        private readonly IBotDataStorage _botStorage;
+        private readonly IBotMessenger _botMessenger;
+        private readonly PaginationState _paginationState = new();
+        
+        public UpdateProcessor(IBotMessenger botMessenger) : this(
+            botMessenger, 
+            new UserDataStorage(), 
+            new BotDataStorage()) { }
+        
+        public UpdateProcessor(
+            IBotMessenger botMessenger, 
+            IUserDataStorage userDataStorage, 
+            IBotDataStorage botDataStorage)
         {
-            _botClient = botClient;
-            _dataStorage = new UserDataStorage();
-            _botStorage = new BotDataStorage();
-            _botMessenger = new BotMessenger(botClient);
+            _userDataStorage = userDataStorage;
+            _botStorage = botDataStorage;
+            _botMessenger = botMessenger;
         }
 
         public Task ProcessMessage(Message message)
@@ -61,7 +74,9 @@ namespace RaceWriterBot.Temp
         {
             switch (message.Text)
             {
-                case "/start": _dataStorage.AddNewUser(message.Chat.Id);
+                case "/start": 
+                    _userDataStorage.AddNewUser(message.Chat.Id);
+                    _botMessenger.SendMessage(message.Chat.Id, "Ласкаво просимо");
                     break;
                 case "/settings": Settings(message.Chat.Id);
                     
@@ -73,28 +88,36 @@ namespace RaceWriterBot.Temp
 
         private void Settings(long chatId)
         {
-            var targetChatSession = _dataStorage.GetTargetChatSessions(chatId);
-            if (targetChatSession.Count == 0)
+            var targetChatSessions = _userDataStorage.GetTargetChatSessions(chatId);
+            if (targetChatSessions != null)
             {
-                _botMessenger.SendMessage(chatId, "У вас немає активних каналів", 
-                    replyMarkup: new InlineKeyboardButton[][]
-                    {
-                        [("Створити", "CreateTargetChatSession")]
-                    });
-            }
-            else
-            {
-                _botMessenger.SendMessage(chatId, "Активні канали",
-                    replyMarkup: new InlineKeyboardButton[][]
-                    {
-                        [(_dataStorage.GetTargetChatSessions(chatId).ToString(), "1")]
-                    });
+                if (targetChatSessions.Count == 0)
+                {
+                    _botMessenger.SendMessage(chatId, "У вас немає активних каналів",
+                        replyMarkup: new InlineKeyboardButton[][]
+                        {
+                            [("Створити", "CreateTargetChatSession")]
+                        });
+                }
+                else
+                {
+                    var paging = new Paging<TargetChatSession>(
+                        targetChatSessions.ToList(),
+                        session => session.Name,
+                        $"{CHANNELS_PAGE}_",
+                        CountObjectsPerPage);
+
+                    _paginationState.SavePagination(chatId, CHANNELS_PAGE, paging);
+
+                    var keyboard = paging.GetPageMarkup(0);
+                    _botMessenger.SendMessage(chatId, "Активні канали", keyboard);
+                }
             }
         }
 
         private void RegisterNewTargetChat(Message message)
         {
-            _dataStorage.AddTargetChatSession(message.From.Id, new TargetChatSession(message.ForwardFromChat.Title, message.ForwardFromChat.Id));
+            _userDataStorage.AddTargetChatSession(message.From.Id, new TargetChatSession(message.ForwardFromChat.Title, message.ForwardFromChat.Id));
         }
 
         
@@ -114,16 +137,25 @@ namespace RaceWriterBot.Temp
            
         }
 
+        
         public Task ProcessCallbackQuery(CallbackQuery query)
         {
+            var segments = query.Data.Split('_', 3);
+            if (segments.Length >= 2)
+            {
+                var pageType = segments[0];
+                var action = segments[1];
+                HandlePagination(query, pageType, action, segments.Length > 2 ? segments[2] : null);
+                return Task.CompletedTask;
+            }
             switch (query.Data)
             {
                 case "CreateTargetChatSession": AddBotToTargetChatSettings(query.From.Id);
                     break;
                 case "UserConfirmAddingBotToTargetChat": RequestForwardedMessage(query.From.Id);
                     break;
-                case "2":
-                    break;
+                //case "PickedChannel": ShowHashTags(query.From.Id, query);
+                //    break;
                 case "3":
                     break;
                 case "4":
@@ -134,6 +166,97 @@ namespace RaceWriterBot.Temp
                     break;
             }
             return Task.CompletedTask;
+        }
+
+        private void HandlePagination(CallbackQuery query, string pageType, string action, string data)
+        {
+            var userId = query.From.Id;
+            var chatId = query.Message.Chat.Id;
+            var messageId = query.Message.MessageId;
+
+            switch (pageType)
+            {
+                case CHANNELS_PAGE:
+                    HandlePaginationAction<TargetChatSession>(
+                        userId, chatId, messageId, pageType, action, data,
+                        (session) => ShowHashtags(userId, session, messageId));
+                    break;
+
+                case HASHTAGS_PAGE:
+                    HandlePaginationAction<HashtagSession>(
+                        userId, chatId, messageId, pageType, action, data,
+                        (hashtag) => ShowMessages(userId, hashtag, messageId));
+                    break;
+
+                case MESSAGES_PAGE:
+                    HandlePaginationAction<PostMessagePair>(
+                        userId, chatId, messageId, pageType, action, data,
+                        (pair) => ShowMessageDetails(userId, pair, messageId));
+                    break;
+            }
+        }
+
+        private void ShowMessageDetails(long userId, PostMessagePair pair, int messageId)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ShowMessages(long userId, HashtagSession hashtag, int messageId)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ShowHashtags(long userId, TargetChatSession channel, int messageId)
+        {
+            var hashtags = _userDataStorage.GetHashtagSessions(channel);
+
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                _botMessenger.EditMessageText(
+                    userId,
+                    messageId,
+                    $"Канал {channel.Name} не має хештегів");
+                //create
+            }
+
+            var paging = new Paging<HashtagSession>(
+                hashtags.ToList(),
+                hashtag => hashtag.Hashtag,
+                $"{HASHTAGS_PAGE}_",
+                CountObjectsPerPage);
+
+            _paginationState.SavePagination(userId, HASHTAGS_PAGE, paging);
+
+            var markup = paging.GetPageMarkup(0);
+            _botMessenger.EditMessageText(userId, messageId, $"Хештеги для каналу {channel.Name}:", markup);
+        }
+
+        private void HandlePaginationAction<T>(
+            long userId, long chatId, int messageId, 
+            string pageType, string action, string data, 
+            Action<T> onItemSelected)
+        {
+            var paging = _paginationState.GetPagination<T>(userId, pageType);
+            if (paging == null) return;
+
+            switch (action)
+            {
+                case "page":
+                    if (Int32.TryParse(data, out var pageNumber))
+                    {
+                        var markup = paging.GetPageMarkup(pageNumber);
+                        _botMessenger.EditMessageReplyMarkup(chatId, messageId, markup);
+                    }
+                    break;
+
+                case "item":
+                    var selectedItem = paging.GetItem(data);
+                    if (selectedItem != null)
+                    {
+                        onItemSelected(selectedItem);
+                    }
+                    break;
+            }
         }
 
         private void AddBotToTargetChatSettings(long chatId)
@@ -172,7 +295,7 @@ namespace RaceWriterBot.Temp
 
             var slots = new List<string>();
 
-            foreach (Match match in matches)
+            foreach (System.Text.RegularExpressions.Match match in matches)
             {
                 var value = match.Value;
                 if (TimeOnly.TryParse(value, out var time))
@@ -191,30 +314,5 @@ namespace RaceWriterBot.Temp
                 _botStorage.AddTargetChatId(myChatMember.Chat.Id);
             }
         }
-
-        //private List<InlineKeyboardButton[]> GetButton<T>(List<T> list, int countPerLine)
-        //{
-        //    var count = Math.Floor((decimal)list.Count / countPerLine);
-        //    var result = new List<InlineKeyboardButton>();
-        //    for (int i = 0; i < count; i++)
-        //    {
-
-        //    }
-        //    var keyboard = new InlineKeyboardButton[countPerLine + 2];
-
-
-        //}
-
-
-
-        //public Task ProcessPost(Message post)
-        //{
-
-        //}
-
-        //public Task ProcessEditMessage(Message editMessage)
-        //{
-
-        //}
     }
 }

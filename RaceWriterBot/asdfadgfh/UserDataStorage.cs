@@ -1,8 +1,26 @@
 ﻿namespace RaceWriterBot.Temp
 {
-    public class UserDataStorage
+    public class UserDataStorage : IUserDataStorage
     {
         private Dictionary<long, UserSession> _usersSessions = new Dictionary<long, UserSession>();
+        public UserDataStorage()
+        {
+            _usersSessions.Add(190866300, 
+                new UserSession
+                {
+                    UserChatId = 190866300,
+                    TargetChats = new List<TargetChatSession>
+                    {
+                        new TargetChatSession("Test1", 123),
+                        new TargetChatSession("Test2", 124),
+                        new TargetChatSession("Test3", 125),
+                        new TargetChatSession("Test4", 126),
+                        new TargetChatSession("Test5", 127),
+                        new TargetChatSession("Test6", 128),
+                        new TargetChatSession("Test7", 129)
+                    }
+                });
+        }
 
         public void AddNewUser(long userId)
         {
@@ -29,7 +47,17 @@
 
         public void AddTargetChatSession(long userId, TargetChatSession targetChatSession)
         {
-
+            _usersSessions[userId].TargetChats.Add(targetChatSession);
         }
+
+    }
+
+    public interface IUserDataStorage
+    {
+        void AddNewUser(long userId);
+        UserSession GetUserSession(long userId);
+        IReadOnlyCollection<TargetChatSession> GetTargetChatSessions(long userId);
+        void AddTargetChatSession(long userId, TargetChatSession targetChatSession);
+        IReadOnlyCollection<HashtagSession> GetHashtagSessions(TargetChatSession targetChatSession);
     }
 }

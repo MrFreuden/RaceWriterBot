@@ -1,7 +1,7 @@
 ﻿
 namespace RaceWriterBot.Temp
 {
-    public class BotDataStorage
+    public class BotDataStorage : IBotDataStorage
     {
         private readonly Dictionary<long, long> _keyValuePairs = new Dictionary<long, long>();
         public bool AddOwner(long ownerId, long targetChatId)
@@ -21,5 +21,11 @@ namespace RaceWriterBot.Temp
         {
             _keyValuePairs.Add(targetChatId, default);
         }
+    }
+    
+    public interface IBotDataStorage
+    {
+        bool AddOwner(long ownerId, long targetChatId);
+        void AddTargetChatId(long targetChatId);
     }
 }
