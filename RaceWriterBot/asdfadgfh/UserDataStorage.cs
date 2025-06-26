@@ -50,10 +50,29 @@
             _usersSessions[userId].TargetChats.Add(targetChatSession);
         }
 
+        public void UpdateHashtagTemplate(long userId, HashtagSession hashtag)
+        {
+            var targetChat = _usersSessions[userId].TargetChats
+                .FirstOrDefault(chat => chat.Hashtags
+                    .Any(h => h.Hashtag == hashtag.Hashtag));
+
+            if (targetChat != null)
+            {
+                var oldHashtag = targetChat.Hashtags
+                    .FirstOrDefault(h => h.Hashtag == hashtag.Hashtag);
+
+                if (oldHashtag != null)
+                {
+                    oldHashtag.TextTemplate = hashtag.TextTemplate;
+                }
+            }
+        }
+
     }
 
     public interface IUserDataStorage
     {
+        void UpdateHashtagTemplate(long userId, HashtagSession hashtag);
         void AddNewUser(long userId);
         UserSession GetUserSession(long userId);
         IReadOnlyCollection<TargetChatSession> GetTargetChatSessions(long userId);

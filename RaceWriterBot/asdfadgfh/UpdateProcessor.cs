@@ -1,32 +1,34 @@
-﻿using Moq;
-using RaceWriterBot.asdfadgfh;
+﻿using RaceWriterBot.asdfadgfh;
 using System.Text.RegularExpressions;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Temp
 {
-    public partial class UpdateProcessor
+    public class UpdateProcessor
     {
         private const int CountObjectsPerPage = 3;
         private const string CHANNELS_PAGE = "channels";
         private const string HASHTAGS_PAGE = "hashtags";
         private const string MESSAGES_PAGE = "messages";
+        private const string ACTION_EDIT_HASHTAG_TEMPLATE = "edit_hashtag_template";
 
         private readonly IUserDataStorage _userDataStorage;
         private readonly IBotDataStorage _botStorage;
         private readonly IBotMessenger _botMessenger;
         private readonly PaginationState _paginationState = new();
-        
+        private readonly UserDialogManager _dialogManager = new();
+
+
         public UpdateProcessor(IBotMessenger botMessenger) : this(
-            botMessenger, 
-            new UserDataStorage(), 
-            new BotDataStorage()) { }
-        
+            botMessenger,
+            new UserDataStorage(),
+            new BotDataStorage())
+        { }
+
         public UpdateProcessor(
-            IBotMessenger botMessenger, 
-            IUserDataStorage userDataStorage, 
+            IBotMessenger botMessenger,
+            IUserDataStorage userDataStorage,
             IBotDataStorage botDataStorage)
         {
             _userDataStorage = userDataStorage;
@@ -38,6 +40,12 @@ namespace RaceWriterBot.Temp
         {
             if (IsPrivateMessage(message))
             {
+                var dialog = _dialogManager.GetCurrentDialog(message.From.Id);
+                if (dialog != null)
+                {
+                    ProcessDialogMessage(message, dialog);
+                    return Task.CompletedTask;
+                }
                 if (IsForwardedMessage(message))
                 {
                     CheckAccess(message);
@@ -51,6 +59,32 @@ namespace RaceWriterBot.Temp
                 var parsed = ParseMessage(message);
             }
             return Task.CompletedTask;
+        }
+
+        private void ProcessDialogMessage(Message message, IDialogState dialog)
+        {
+            switch (dialog.ExpectedAction)
+            {
+                case ACTION_EDIT_HASHTAG_TEMPLATE:
+                    ProcessHashtagTemplateEdit(message, dialog);
+                    break;
+            }
+        }
+
+        private void ProcessHashtagTemplateEdit(Message message, IDialogState dialog)
+        {
+            var userId = message.From.Id;
+            if (_dialogManager.TryGetDialogState(userId, out HashtagSession hashtag, out _))
+            {
+                _dialogManager.ClearDialog(userId);
+
+
+                if (hashtag != null)
+                {
+                    hashtag.TextTemplate = message.Text;
+                    _userDataStorage.UpdateHashtagTemplate(userId, hashtag);
+                }
+            }
         }
 
         private bool IsPrivateMessage(Message message)
@@ -68,18 +102,19 @@ namespace RaceWriterBot.Temp
             return message.ReplyToMessage != null;
         }
 
-        
+
 
         private void ProcessPrivateMessage(Message message)
         {
             switch (message.Text)
             {
-                case "/start": 
+                case "/start":
                     _userDataStorage.AddNewUser(message.Chat.Id);
                     _botMessenger.SendMessage(message.Chat.Id, "Ласкаво просимо");
                     break;
-                case "/settings": Settings(message.Chat.Id);
-                    
+                case "/settings":
+                    Settings(message.Chat.Id);
+
                     break;
                 default:
                     break;
@@ -120,7 +155,7 @@ namespace RaceWriterBot.Temp
             _userDataStorage.AddTargetChatSession(message.From.Id, new TargetChatSession(message.ForwardFromChat.Title, message.ForwardFromChat.Id));
         }
 
-        
+
 
         private void CheckAccess(Message forwardedMessage)
         {
@@ -134,12 +169,19 @@ namespace RaceWriterBot.Temp
             {
                 _botMessenger.SendMessage(forwardedMessage.From.Id, "Помилка");
             }
-           
+
         }
 
-        
+
         public Task ProcessCallbackQuery(CallbackQuery query)
         {
+            if (query.Data.StartsWith("EditTemplateMessageText_"))
+            {
+                string hashtagName = query.Data.Split('_').Last();
+                StartEditHashtagTemplate(query.From.Id, hashtagName, query.Message.MessageId);
+                return Task.CompletedTask;
+            }
+
             var segments = query.Data.Split('_', 3);
             if (segments.Length >= 2)
             {
@@ -150,12 +192,12 @@ namespace RaceWriterBot.Temp
             }
             switch (query.Data)
             {
-                case "CreateTargetChatSession": AddBotToTargetChatSettings(query.From.Id);
+                case "CreateTargetChatSession":
+                    AddBotToTargetChatSettings(query.From.Id);
                     break;
-                case "UserConfirmAddingBotToTargetChat": RequestForwardedMessage(query.From.Id);
+                case "UserConfirmAddingBotToTargetChat":
+                    RequestForwardedMessage(query.From.Id);
                     break;
-                //case "PickedChannel": ShowHashTags(query.From.Id, query);
-                //    break;
                 case "3":
                     break;
                 case "4":
@@ -166,6 +208,27 @@ namespace RaceWriterBot.Temp
                     break;
             }
             return Task.CompletedTask;
+        }
+
+        private void StartEditHashtagTemplate(long userId, string hashtagName, int messageId)
+        {
+            var userSession = _userDataStorage.GetUserSession(userId);
+            var hashtag = userSession.TargetChats
+                .SelectMany(c => c.Hashtags)
+                .FirstOrDefault(h => h.Hashtag == hashtagName);
+            if (hashtag == null)
+            {
+                _botMessenger.SendMessage(
+                    new ChatId(userId),
+                    "Хештег не знайдено або у вас немає прав для його редагування.");
+                return;
+            }
+
+            _dialogManager.SetExpectedAction(userId, ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
+
+            _botMessenger.SendMessage(
+                new ChatId(userId),
+                "Будь ласка, введіть новий текст шаблону для хештега #" + hashtagName);
         }
 
         private void HandlePagination(CallbackQuery query, string pageType, string action, string data)
@@ -185,7 +248,7 @@ namespace RaceWriterBot.Temp
                 case HASHTAGS_PAGE:
                     HandlePaginationAction<HashtagSession>(
                         userId, chatId, messageId, pageType, action, data,
-                        (hashtag) => ShowMessages(userId, hashtag, messageId));
+                        (hashtag) => ShowTemplateMessage(userId, hashtag, messageId));
                     break;
 
                 case MESSAGES_PAGE:
@@ -201,9 +264,11 @@ namespace RaceWriterBot.Temp
             throw new NotImplementedException();
         }
 
-        private void ShowMessages(long userId, HashtagSession hashtag, int messageId)
+        private void ShowTemplateMessage(long userId, HashtagSession hashtag, int messageId)
         {
-            throw new NotImplementedException();
+            var text = hashtag.TextTemplate;
+            var markup = new InlineKeyboardButton("Редагувати", $"EditTemplateMessageText_{hashtag.Hashtag}");
+            _botMessenger.EditMessageText(userId, messageId, text, markup);
         }
 
         private void ShowHashtags(long userId, TargetChatSession channel, int messageId)
@@ -216,7 +281,8 @@ namespace RaceWriterBot.Temp
                     userId,
                     messageId,
                     $"Канал {channel.Name} не має хештегів");
-                //create
+                
+
             }
 
             var paging = new Paging<HashtagSession>(
@@ -232,8 +298,8 @@ namespace RaceWriterBot.Temp
         }
 
         private void HandlePaginationAction<T>(
-            long userId, long chatId, int messageId, 
-            string pageType, string action, string data, 
+            long userId, long chatId, int messageId,
+            string pageType, string action, string data,
             Action<T> onItemSelected)
         {
             var paging = _paginationState.GetPagination<T>(userId, pageType);

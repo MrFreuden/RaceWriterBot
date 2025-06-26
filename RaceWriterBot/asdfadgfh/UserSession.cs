@@ -25,9 +25,15 @@
 
     public class HashtagSession
     {
+        private const string DefaultTextTemplate = "18:20 - 0 вільних місць\r\n18:35 - 0 вільних місць\r\n18:55 - 0 вільних місць";
         public string Hashtag { get; set; }
         public string TextTemplate { get; set; }
         public List<PostMessagePair> Messages { get; set; } = new();
+
+        public HashtagSession()
+        {
+            TextTemplate = DefaultTextTemplate;
+        }
     }
 
     public class PostMessagePair
