@@ -12,6 +12,8 @@ namespace RaceWriterBot.Temp
         private const string HASHTAGS_PAGE = "hashtags";
         private const string MESSAGES_PAGE = "messages";
         private const string ACTION_EDIT_HASHTAG_TEMPLATE = "edit_hashtag_template";
+        private const string ACTION_ADD_HASHTAG = "add_hashtag";
+        private const string ACTION_EDIT_HASHTAG = "edit_hashtag";
 
         private readonly IUserDataStorage _userDataStorage;
         private readonly IBotDataStorage _botStorage;
@@ -68,6 +70,27 @@ namespace RaceWriterBot.Temp
                 case ACTION_EDIT_HASHTAG_TEMPLATE:
                     ProcessHashtagTemplateEdit(message, dialog);
                     break;
+
+                case ACTION_ADD_HASHTAG:
+                    ProcessHashtagAdd(message, dialog);
+                    break;
+            }
+        }
+
+        private void ProcessHashtagAdd(Message message, IDialogState dialog)
+        {
+            var userId = message.From.Id;
+            if (_dialogManager.TryGetDialogState(userId, out TargetChatSession chatSession, out _))
+            {
+                _dialogManager.ClearDialog(userId);
+
+
+                if (chatSession != null)
+                {
+                    //TODO
+                    //chatSession.
+                    //_userDataStorage.UpdateHashtagTemplate(userId, chatSession);
+                }
             }
         }
 
@@ -82,7 +105,7 @@ namespace RaceWriterBot.Temp
                 if (hashtag != null)
                 {
                     hashtag.TextTemplate = message.Text;
-                    _userDataStorage.UpdateHashtagTemplate(userId, hashtag);
+                    _userDataStorage.UpdateHashtagTemplate(userId, hashtag.HashtagName, hashtag.TextTemplate);
                 }
             }
         }
@@ -177,8 +200,17 @@ namespace RaceWriterBot.Temp
         {
             if (query.Data.StartsWith("EditTemplateMessageText_"))
             {
-                string hashtagName = query.Data.Split('_').Last();
+                var hashtagName = query.Data.Split('_').Last();
                 StartEditHashtagTemplate(query.From.Id, hashtagName, query.Message.MessageId);
+                return Task.CompletedTask;
+            }
+
+            if (query.Data.StartsWith("AddHashtag_"))
+            {
+                if (Int32.TryParse(query.Data.Split("_").Last(), out var channelHash))
+                {
+                    AddNewHashtag(query.From.Id, channelHash, query.Message.MessageId);
+                }
                 return Task.CompletedTask;
             }
 
@@ -210,16 +242,34 @@ namespace RaceWriterBot.Temp
             return Task.CompletedTask;
         }
 
+        private void AddNewHashtag(long userId, int channelHash, int messageId)
+        {
+            var userSession = _userDataStorage.GetUserSession(userId);
+            var channelSession = _userDataStorage.GetTargetChatSessions(userId)
+                .Where(s => s.GetHashCode() == channelHash)
+                .FirstOrDefault();
+
+            if (channelSession != null)
+            {
+                _dialogManager.SetExpectedAction(userId, ACTION_ADD_HASHTAG, channelSession);
+
+                _botMessenger.SendMessage(
+                    userId,
+                    "Введіть новий текст нового хештега"
+                    );
+            }
+        }
+        
         private void StartEditHashtagTemplate(long userId, string hashtagName, int messageId)
         {
             var userSession = _userDataStorage.GetUserSession(userId);
             var hashtag = userSession.TargetChats
                 .SelectMany(c => c.Hashtags)
-                .FirstOrDefault(h => h.Hashtag == hashtagName);
+                .FirstOrDefault(h => h.HashtagName == hashtagName);
             if (hashtag == null)
             {
                 _botMessenger.SendMessage(
-                    new ChatId(userId),
+                    userId,
                     "Хештег не знайдено або у вас немає прав для його редагування.");
                 return;
             }
@@ -227,7 +277,7 @@ namespace RaceWriterBot.Temp
             _dialogManager.SetExpectedAction(userId, ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
 
             _botMessenger.SendMessage(
-                new ChatId(userId),
+                userId,
                 "Будь ласка, введіть новий текст шаблону для хештега #" + hashtagName);
         }
 
@@ -267,27 +317,28 @@ namespace RaceWriterBot.Temp
         private void ShowTemplateMessage(long userId, HashtagSession hashtag, int messageId)
         {
             var text = hashtag.TextTemplate;
-            var markup = new InlineKeyboardButton("Редагувати", $"EditTemplateMessageText_{hashtag.Hashtag}");
+            var markup = new InlineKeyboardButton("Редагувати", $"EditTemplateMessageText_{hashtag.HashtagName}");
             _botMessenger.EditMessageText(userId, messageId, text, markup);
         }
 
         private void ShowHashtags(long userId, TargetChatSession channel, int messageId)
         {
-            var hashtags = _userDataStorage.GetHashtagSessions(channel);
+            var hashtags = _userDataStorage.GetHashtagSessions(userId, channel.TargetChatId);
 
             if (hashtags == null || hashtags.Count == 0)
             {
+                var keyboard = new InlineKeyboardButton("Створити", $"AddHashtag_{channel.GetHashCode}");
+
                 _botMessenger.EditMessageText(
                     userId,
                     messageId,
-                    $"Канал {channel.Name} не має хештегів");
-                
-
+                    $"Канал {channel.Name} не має хештегів",
+                    keyboard);
             }
 
             var paging = new Paging<HashtagSession>(
                 hashtags.ToList(),
-                hashtag => hashtag.Hashtag,
+                hashtag => hashtag.HashtagName,
                 $"{HASHTAGS_PAGE}_",
                 CountObjectsPerPage);
 

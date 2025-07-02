@@ -2,81 +2,83 @@
 {
     public class UserDataStorage : IUserDataStorage
     {
-        private Dictionary<long, UserSession> _usersSessions = new Dictionary<long, UserSession>();
+        private Dictionary<long, UserSession> _usersSessions = [];
         public UserDataStorage()
         {
-            _usersSessions.Add(190866300, 
-                new UserSession
-                {
-                    UserChatId = 190866300,
-                    TargetChats = new List<TargetChatSession>
-                    {
-                        new TargetChatSession("Test1", 123),
-                        new TargetChatSession("Test2", 124),
-                        new TargetChatSession("Test3", 125),
-                        new TargetChatSession("Test4", 126),
-                        new TargetChatSession("Test5", 127),
-                        new TargetChatSession("Test6", 128),
-                        new TargetChatSession("Test7", 129)
-                    }
-                });
+            var defaultUser = new UserSession { UserChatId = 190866300 };
+            defaultUser.AddTargetChatSession(new TargetChatSession("Test1", 123));
+            defaultUser.AddTargetChatSession(new TargetChatSession("Test2", 124));
+            defaultUser.AddTargetChatSession(new TargetChatSession("Test3", 125));
+            defaultUser.AddTargetChatSession(new TargetChatSession("Test4", 126));
+            defaultUser.AddTargetChatSession(new TargetChatSession("Test5", 127));
+            defaultUser.AddTargetChatSession(new TargetChatSession("Test6", 128));
+            defaultUser.AddTargetChatSession(new TargetChatSession("Test7", 129));
+
+            _usersSessions.Add(190866300, defaultUser);
         }
 
         public void AddNewUser(long userId)
         {
             if (!_usersSessions.ContainsKey(userId))
-            {
-                _usersSessions.Add(userId, new UserSession());
-            }
+                _usersSessions.Add(userId, new UserSession() { UserChatId = userId });
         }
 
         public UserSession GetUserSession(long userId)
         {
-            return _usersSessions[userId];
+            return _usersSessions.TryGetValue(userId, out var session)
+            ? session
+            : throw new InvalidOperationException("User not found");
         }
 
-        public IReadOnlyCollection<TargetChatSession> GetTargetChatSessions(long userId)
+        public IReadOnlyList<TargetChatSession> GetTargetChatSessions(long userId)
         {
-            return _usersSessions[userId].TargetChats;
+            return GetUserSession(userId).TargetChats;
         }
 
-        public IReadOnlyCollection<HashtagSession> GetHashtagSessions(TargetChatSession targetChatSession)
+        public IReadOnlyList<HashtagSession> GetHashtagSessions(long userId, long targetChatId)
         {
-            return targetChatSession.Hashtags;
+            var user = GetUserSession(userId);
+            var chat = user.TargetChats.FirstOrDefault(c => c.TargetChatId == targetChatId)
+                       ?? throw new InvalidOperationException("Target chat not found");
+
+            return chat.Hashtags;
         }
 
         public void AddTargetChatSession(long userId, TargetChatSession targetChatSession)
         {
-            _usersSessions[userId].TargetChats.Add(targetChatSession);
+            var user = GetUserSession(userId);
+            user.AddTargetChatSession(targetChatSession);
         }
 
-        public void UpdateHashtagTemplate(long userId, HashtagSession hashtag)
+        public void AddHashtagSession(long userId, long targetChatId, HashtagSession hashtag)
         {
-            var targetChat = _usersSessions[userId].TargetChats
-                .FirstOrDefault(chat => chat.Hashtags
-                    .Any(h => h.Hashtag == hashtag.Hashtag));
+            var user = GetUserSession(userId);
+            user.AddHashtag(targetChatId, hashtag);
+        }
 
-            if (targetChat != null)
-            {
-                var oldHashtag = targetChat.Hashtags
-                    .FirstOrDefault(h => h.Hashtag == hashtag.Hashtag);
+        public void UpdateHashtagTemplate(long userId, string hashtagName, string newTemplate)
+        {
+            var user = GetUserSession(userId);
+            user.UpdateHashtagTextTemplate(hashtagName, newTemplate);
+        }
 
-                if (oldHashtag != null)
-                {
-                    oldHashtag.TextTemplate = hashtag.TextTemplate;
-                }
-            }
+        public void UpdateHashtagName(long userId, string hashtagName, string newName)
+        {
+            var user = GetUserSession(userId);
+            user.UpdateHashtagName(hashtagName, newName);
         }
 
     }
 
     public interface IUserDataStorage
     {
-        void UpdateHashtagTemplate(long userId, HashtagSession hashtag);
         void AddNewUser(long userId);
         UserSession GetUserSession(long userId);
-        IReadOnlyCollection<TargetChatSession> GetTargetChatSessions(long userId);
+        IReadOnlyList<TargetChatSession> GetTargetChatSessions(long userId);
+        IReadOnlyList<HashtagSession> GetHashtagSessions(long userId, long targetChatId);
         void AddTargetChatSession(long userId, TargetChatSession targetChatSession);
-        IReadOnlyCollection<HashtagSession> GetHashtagSessions(TargetChatSession targetChatSession);
+        void AddHashtagSession(long userId, long targetChatId, HashtagSession hashtag);
+        void UpdateHashtagTemplate(long userId, string hashtagName, string newTemplate);
+        void UpdateHashtagName(long userId, string hashtagName, string newName);
     }
 }
