@@ -20,7 +20,7 @@ namespace RaceWriterBot.Temp
         private readonly IBotMessenger _botMessenger;
         private readonly PaginationState _paginationState = new();
         private readonly UserDialogManager _dialogManager = new();
-
+        private readonly Dictionary<long, Stack<(string pageType, object context)>> _navigationHistory = new();
 
         public UpdateProcessor(IBotMessenger botMessenger) : this(
             botMessenger,
@@ -74,6 +74,10 @@ namespace RaceWriterBot.Temp
                 case ACTION_ADD_HASHTAG:
                     ProcessHashtagAdd(message, dialog);
                     break;
+
+                case ACTION_EDIT_HASHTAG:
+                    ProcessHashtagEdit(message, dialog);
+                    break;
             }
         }
 
@@ -88,10 +92,15 @@ namespace RaceWriterBot.Temp
                 if (chatSession != null)
                 {
                     //TODO
-                    //chatSession.
-                    //_userDataStorage.UpdateHashtagTemplate(userId, chatSession);
+                    var hash = new HashtagSession() { HashtagName = message.Text };
+                    _userDataStorage.AddHashtagSession(userId, chatSession.TargetChatId, hash);
                 }
             }
+        }
+
+        private void ProcessHashtagEdit(Message message, IDialogState dialog)
+        {
+
         }
 
         private void ProcessHashtagTemplateEdit(Message message, IDialogState dialog)
@@ -255,8 +264,7 @@ namespace RaceWriterBot.Temp
 
                 _botMessenger.SendMessage(
                     userId,
-                    "Введіть новий текст нового хештега"
-                    );
+                    "Введіть новий хештег");
             }
         }
         
@@ -327,13 +335,14 @@ namespace RaceWriterBot.Temp
 
             if (hashtags == null || hashtags.Count == 0)
             {
-                var keyboard = new InlineKeyboardButton("Створити", $"AddHashtag_{channel.GetHashCode}");
+                var keyboard = new InlineKeyboardButton("Створити", $"AddHashtag_{channel.GetHashCode()}");
 
                 _botMessenger.EditMessageText(
                     userId,
                     messageId,
                     $"Канал {channel.Name} не має хештегів",
                     keyboard);
+                return;
             }
 
             var paging = new Paging<HashtagSession>(
@@ -370,8 +379,52 @@ namespace RaceWriterBot.Temp
                     var selectedItem = paging.GetItem(data);
                     if (selectedItem != null)
                     {
+                        SaveNavigationState(userId, pageType, selectedItem);
                         onItemSelected(selectedItem);
                     }
+                    break;
+
+                case "back":
+                    NavigateBack(userId, chatId, messageId);
+                    break;
+            }
+        }
+
+        private void SaveNavigationState<T>(long userId, string pageType, T context)
+        {
+            if (!_navigationHistory.TryGetValue(userId, out var history))
+            {
+                history = new Stack<(string pageType, object context)>();
+                _navigationHistory[userId] = history;
+            }
+
+            history.Push((pageType, context));
+        }
+
+        private void NavigateBack(long userId, long chatId, int messageId)
+        {
+            if (!_navigationHistory.TryGetValue(userId, out var history) || history.Count == 0)
+            {
+                Settings(userId);
+                return;
+            }
+
+            var (previousPageType, previousContext) = history.Pop();
+
+            switch (previousPageType)
+            {
+                case CHANNELS_PAGE:
+                    Settings(userId);
+                    break;
+
+                case HASHTAGS_PAGE:
+                    if (previousContext is TargetChatSession session)
+                        ShowHashtags(userId, session, messageId);
+                    break;
+
+                case MESSAGES_PAGE:
+                    if (previousContext is HashtagSession hashtag)
+                        ShowTemplateMessage(userId, hashtag, messageId);
                     break;
             }
         }

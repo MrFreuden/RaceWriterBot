@@ -40,7 +40,7 @@ namespace RaceWriterBot.asdfadgfh
 
         public async Task<Message> EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup keyboardMarkup)
         {
-            var task = await _client.EditMessageText(chatId, messageId, text);
+            var task = await _client.EditMessageText(chatId, messageId, text, replyMarkup: keyboardMarkup);
             return task;
         }
     }
