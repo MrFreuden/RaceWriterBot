@@ -143,10 +143,10 @@ namespace RaceWriterBot.Temp
                 case "/start":
                     _userDataStorage.AddNewUser(message.Chat.Id);
                     _botMessenger.SendMessage(message.Chat.Id, "Ласкаво просимо");
+                    Settings(message.Chat.Id);
                     break;
                 case "/settings":
                     Settings(message.Chat.Id);
-
                     break;
                 default:
                     break;
