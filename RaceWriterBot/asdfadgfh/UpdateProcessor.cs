@@ -158,7 +158,7 @@ namespace RaceWriterBot.Temp
                     _botMessenger.SendMessage(chatId, "У вас немає активних каналів",
                         replyMarkup: new InlineKeyboardButton[][]
                         {
-                            [("Створити", "CreateTargetChatSession")]
+                            [("Створити", Constants.CommandNames.ACTION_CREATE_TARGET_CHAT)]
                         });
                 }
                 else
@@ -209,7 +209,7 @@ namespace RaceWriterBot.Temp
                 return Task.CompletedTask;
             }
 
-            if (query.Data.StartsWith("AddHashtag_"))
+            if (query.Data.StartsWith(Constants.CommandNames.ACTION_ADD_HASHTAG))
             {
                 if (Int32.TryParse(query.Data.Split("_").Last(), out var channelHash))
                 {
@@ -228,10 +228,10 @@ namespace RaceWriterBot.Temp
             }
             switch (query.Data)
             {
-                case "CreateTargetChatSession":
+                case Constants.CommandNames.ACTION_CREATE_TARGET_CHAT:
                     AddBotToTargetChatSettings(query.From.Id);
                     break;
-                case "UserConfirmAddingBotToTargetChat":
+                case Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT:
                     RequestForwardedMessage(query.From.Id);
                     break;
                 case "3":
@@ -429,7 +429,7 @@ namespace RaceWriterBot.Temp
             _botMessenger.SendMessage(chatId, "Додайте бота в чат обговорень каналу та дайте йому права адміністратора",
                 replyMarkup: new InlineKeyboardButton[][]
                     {
-                        [("Зроблено", "UserConfirmAddingBotToTargetChat")]
+                        [("Зроблено", Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT)]
                     });
         }
 
