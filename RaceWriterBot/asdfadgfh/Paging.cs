@@ -55,15 +55,15 @@ namespace RaceWriterBot.Temp
 
             var navButtons = new List<InlineKeyboardButton>();
             if (page > 0)
-                navButtons.Add(InlineKeyboardButton.WithCallbackData("⬅️ Назад", $"{_callbackPrefix}page_{page - 1}"));
+                navButtons.Add(InlineKeyboardButton.WithCallbackData("⬅️", $"{_callbackPrefix}page_{page - 1}"));
             if (page < totalPages - 1)
-                navButtons.Add(InlineKeyboardButton.WithCallbackData("Вперед ➡️", $"{_callbackPrefix}page_{page + 1}"));
+                navButtons.Add(InlineKeyboardButton.WithCallbackData("➡️", $"{_callbackPrefix}page_{page + 1}"));
 
             if (navButtons.Any())
                 rows.Add(navButtons);
 
             rows.Add(new List<InlineKeyboardButton> {
-                InlineKeyboardButton.WithCallbackData("🔙 Повернутися", $"{_callbackPrefix}{ACTION_BACK}") });
+                InlineKeyboardButton.WithCallbackData("Назад", $"{_callbackPrefix}{ACTION_BACK}") });
 
             return new InlineKeyboardMarkup(rows);
         }
