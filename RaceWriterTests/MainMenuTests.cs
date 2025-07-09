@@ -1,7 +1,6 @@
-using RaceWriterBot;
 using Moq;
+using RaceWriterBot;
 using RaceWriterBot.Temp;
-using System.Reflection.Metadata;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 namespace RaceWriterTests
@@ -100,7 +99,7 @@ namespace RaceWriterTests
             var update = CreateMessageUpdate(Constants.CommandNames.Settings);
 
             var targetSession = new TargetChatSession("Тестовый канал", 100);
-            
+
             mockUserStorage
                 .Setup(s => s.GetTargetChatSessions(testUser.Id))
                 .Returns(new List<TargetChatSession> { targetSession });

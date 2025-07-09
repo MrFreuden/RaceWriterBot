@@ -55,9 +55,9 @@ namespace RaceWriterBot.Temp
 
             var navButtons = new List<InlineKeyboardButton>();
             if (page > 0)
-                navButtons.Add(InlineKeyboardButton.WithCallbackData("⬅️", $"{_callbackPrefix}page_{page - 1}"));
+                navButtons.Add(InlineKeyboardButton.WithCallbackData(Constants.CommandNames.Prev, $"{_callbackPrefix}page_{page - 1}"));
             if (page < totalPages - 1)
-                navButtons.Add(InlineKeyboardButton.WithCallbackData("➡️", $"{_callbackPrefix}page_{page + 1}"));
+                navButtons.Add(InlineKeyboardButton.WithCallbackData(Constants.CommandNames.Next, $"{_callbackPrefix}page_{page + 1}"));
 
             if (navButtons.Any())
                 rows.Add(navButtons);
