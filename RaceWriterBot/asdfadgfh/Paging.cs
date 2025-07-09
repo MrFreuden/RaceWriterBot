@@ -4,7 +4,7 @@ namespace RaceWriterBot.Temp
 {
     public class Paging<T>
     {
-        private const string ACTION_BACK = "back";
+        
         private readonly List<T> _values;
         private readonly Func<T, string> _itemTextSelector;
         private readonly string _callbackPrefix;
@@ -63,7 +63,7 @@ namespace RaceWriterBot.Temp
                 rows.Add(navButtons);
 
             rows.Add(new List<InlineKeyboardButton> {
-                InlineKeyboardButton.WithCallbackData("Назад", $"{_callbackPrefix}{ACTION_BACK}") });
+                InlineKeyboardButton.WithCallbackData("Назад", $"{_callbackPrefix}{Constants.CommandNames.ACTION_BACK}") });
 
             return new InlineKeyboardMarkup(rows);
         }

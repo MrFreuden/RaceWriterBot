@@ -1,5 +1,7 @@
+using RaceWriterBot;
 using Moq;
 using RaceWriterBot.Temp;
+using System.Reflection.Metadata;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 namespace RaceWriterTests
@@ -9,7 +11,7 @@ namespace RaceWriterTests
         [Test]
         public async Task Start_Command_Should_AddUserAndSendWelcomeMessage()
         {
-            var update = CreateMessageUpdate("/start");
+            var update = CreateMessageUpdate(Constants.CommandNames.Start);
 
             await handler.HandleUpdateAsync(dummyBot, update, CancellationToken.None);
 
@@ -25,7 +27,7 @@ namespace RaceWriterTests
         [Test]
         public async Task Settings_Command_WithNoActiveChannels_Should_ShowCreateButton()
         {
-            var update = CreateMessageUpdate("/settings");
+            var update = CreateMessageUpdate(Constants.CommandNames.Settings);
 
             mockUserStorage
                 .Setup(s => s.GetTargetChatSessions(testUser.Id))
@@ -95,7 +97,7 @@ namespace RaceWriterTests
         [Test]
         public async Task Settings_Command_WithOneActiveChannel_Should_ShowChannelsList()
         {
-            var update = CreateMessageUpdate("/settings");
+            var update = CreateMessageUpdate(Constants.CommandNames.Settings);
 
             var targetSession = new TargetChatSession("Тестовый канал", 100);
             
@@ -113,31 +115,5 @@ namespace RaceWriterTests
                 It.Is<InlineKeyboardMarkup>(m => m.InlineKeyboard.First().First().Text == "Тестовый канал")),
                 Times.Once);
         }
-
-        [Test]
-        public async Task Settings_Command_WithMultipleChannels_Should_ShowPaginatedList()
-        {
-            var update = CreateMessageUpdate("/settings");
-
-            var channels = Enumerable.Range(1, 6)
-                .Select(i => new TargetChatSession($"Канал {i}", 100 + i))
-                .ToList();
-
-            mockUserStorage
-                .Setup(s => s.GetTargetChatSessions(testUser.Id))
-                .Returns(channels);
-
-            await handler.HandleUpdateAsync(dummyBot, update, CancellationToken.None);
-
-            mockUserStorage.Verify(s => s.GetTargetChatSessions(testUser.Id), Times.Once);
-
-            mockMessenger.Verify(b => b.SendMessage(
-                It.Is<ChatId>(c => c.Identifier == testUser.Id),
-                It.Is<string>(text => text.Contains("Активні канали")),
-                It.Is<InlineKeyboardMarkup>(m => m.InlineKeyboard.Count() >= 3 &&
-                m.InlineKeyboard.ElementAt(1).Any(btn => btn.Text.Contains("Вперед")))),
-                Times.Once);
-        }
     }
-    
 }

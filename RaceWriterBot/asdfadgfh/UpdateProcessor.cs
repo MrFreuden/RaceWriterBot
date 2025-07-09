@@ -8,12 +8,7 @@ namespace RaceWriterBot.Temp
     public class UpdateProcessor
     {
         private const int CountObjectsPerPage = 3;
-        private const string CHANNELS_PAGE = "channels";
-        private const string HASHTAGS_PAGE = "hashtags";
-        private const string MESSAGES_PAGE = "messages";
-        private const string ACTION_EDIT_HASHTAG_TEMPLATE = "edit_hashtag_template";
-        private const string ACTION_ADD_HASHTAG = "add_hashtag";
-        private const string ACTION_EDIT_HASHTAG = "edit_hashtag";
+        
 
         private readonly IUserDataStorage _userDataStorage;
         private readonly IBotDataStorage _botStorage;
@@ -67,15 +62,15 @@ namespace RaceWriterBot.Temp
         {
             switch (dialog.ExpectedAction)
             {
-                case ACTION_EDIT_HASHTAG_TEMPLATE:
+                case Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE:
                     ProcessHashtagTemplateEdit(message, dialog);
                     break;
 
-                case ACTION_ADD_HASHTAG:
+                case Constants.CommandNames.ACTION_ADD_HASHTAG:
                     ProcessHashtagAdd(message, dialog);
                     break;
 
-                case ACTION_EDIT_HASHTAG:
+                case Constants.CommandNames.ACTION_EDIT_HASHTAG:
                     ProcessHashtagEdit(message, dialog);
                     break;
             }
@@ -171,10 +166,10 @@ namespace RaceWriterBot.Temp
                     var paging = new Paging<TargetChatSession>(
                         targetChatSessions.ToList(),
                         session => session.Name,
-                        $"{CHANNELS_PAGE}_",
+                        $"{Constants.CommandNames.CHANNELS_PAGE}_",
                         CountObjectsPerPage);
 
-                    _paginationState.SavePagination(chatId, CHANNELS_PAGE, paging);
+                    _paginationState.SavePagination(chatId, Constants.CommandNames.CHANNELS_PAGE, paging);
 
                     var keyboard = paging.GetPageMarkup(0);
                     _botMessenger.SendMessage(chatId, "Активні канали", keyboard);
@@ -260,7 +255,7 @@ namespace RaceWriterBot.Temp
 
             if (channelSession != null)
             {
-                _dialogManager.SetExpectedAction(userId, ACTION_ADD_HASHTAG, channelSession);
+                _dialogManager.SetExpectedAction(userId, Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
 
                 _botMessenger.SendMessage(
                     userId,
@@ -282,7 +277,7 @@ namespace RaceWriterBot.Temp
                 return;
             }
 
-            _dialogManager.SetExpectedAction(userId, ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
+            _dialogManager.SetExpectedAction(userId, Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
 
             _botMessenger.SendMessage(
                 userId,
@@ -297,19 +292,19 @@ namespace RaceWriterBot.Temp
 
             switch (pageType)
             {
-                case CHANNELS_PAGE:
+                case Constants.CommandNames.CHANNELS_PAGE:
                     HandlePaginationAction<TargetChatSession>(
                         userId, chatId, messageId, pageType, action, data,
                         (session) => ShowHashtags(userId, session, messageId));
                     break;
 
-                case HASHTAGS_PAGE:
+                case Constants.CommandNames.HASHTAGS_PAGE:
                     HandlePaginationAction<HashtagSession>(
                         userId, chatId, messageId, pageType, action, data,
                         (hashtag) => ShowTemplateMessage(userId, hashtag, messageId));
                     break;
 
-                case MESSAGES_PAGE:
+                case Constants.CommandNames.MESSAGES_PAGE:
                     HandlePaginationAction<PostMessagePair>(
                         userId, chatId, messageId, pageType, action, data,
                         (pair) => ShowMessageDetails(userId, pair, messageId));
@@ -348,10 +343,10 @@ namespace RaceWriterBot.Temp
             var paging = new Paging<HashtagSession>(
                 hashtags.ToList(),
                 hashtag => hashtag.HashtagName,
-                $"{HASHTAGS_PAGE}_",
+                $"{Constants.CommandNames.HASHTAGS_PAGE}_",
                 CountObjectsPerPage);
 
-            _paginationState.SavePagination(userId, HASHTAGS_PAGE, paging);
+            _paginationState.SavePagination(userId, Constants.CommandNames.HASHTAGS_PAGE, paging);
 
             var markup = paging.GetPageMarkup(0);
             _botMessenger.EditMessageText(userId, messageId, $"Хештеги для каналу {channel.Name}:", markup);
@@ -413,16 +408,16 @@ namespace RaceWriterBot.Temp
 
             switch (previousPageType)
             {
-                case CHANNELS_PAGE:
+                case Constants.CommandNames.CHANNELS_PAGE:
                     Settings(userId);
                     break;
 
-                case HASHTAGS_PAGE:
+                case Constants.CommandNames.HASHTAGS_PAGE:
                     if (previousContext is TargetChatSession session)
                         ShowHashtags(userId, session, messageId);
                     break;
 
-                case MESSAGES_PAGE:
+                case Constants.CommandNames.MESSAGES_PAGE:
                     if (previousContext is HashtagSession hashtag)
                         ShowTemplateMessage(userId, hashtag, messageId);
                     break;
