@@ -1,5 +1,8 @@
 ﻿using RaceWriterBot.Infrastructure;
+using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Managers
@@ -7,43 +10,89 @@ namespace RaceWriterBot.Managers
     public class Menu
     {
         public string Text;
-        public string[] Buttons;
+        public Dictionary<string, string> ButtonsData = [];
+        public const int MaxPerRow = 3;
+        public const int MaxDataRows = 2;
+
+        public InlineKeyboardMarkup GetMarkup()
+        {
+            var rows = new List<List<InlineKeyboardButton>>();
+            var currentRow = new List<InlineKeyboardButton>();
+
+            foreach (var button in ButtonsData)
+            {
+                currentRow.Add(InlineKeyboardButton.WithCallbackData(button.Key, button.Value));
+
+                if (currentRow.Count == MaxPerRow)
+                {
+                    rows.Add(currentRow);
+                    currentRow = [];
+                }
+            }
+
+            if (currentRow.Count > 0)
+            {
+                rows.Add(currentRow);
+            }
+
+            rows.Add([InlineKeyboardButton.WithCallbackData("Назад", $"{Constants.CommandNames.ACTION_BACK}")]);
+
+            return new InlineKeyboardMarkup(rows);
+        }
+
+        public Menu AddButton(string text, string callbackData)
+        {
+            ButtonsData[text] = callbackData;
+            return this;
+        }
     }
 
     public class MenuManager
     {
         private readonly IBotMessenger _botMessenger;
-        
+        private readonly IUserDataStorage _userDataStorage;
 
-        public MenuManager(IBotMessenger botMessenger)
+        public MenuManager(IBotMessenger botMessenger, IUserDataStorage userDataStorage)
         {
             _botMessenger = botMessenger;
+            _userDataStorage = userDataStorage;
         }
 
-        public void ShowMenu()
+        public async Task<Message> ShowMenu(long userId, Menu menu, int? messageId = null)
         {
+            _userDataStorage.AddMenuHistory(userId, menu);
 
+            var markup = menu.GetMarkup();
+
+            if (messageId.HasValue)
+                return await _botMessenger.EditMessageText(userId, messageId.Value, menu.Text, markup);
+            else
+                return await _botMessenger.SendMessage(userId, menu.Text, markup);
         }
 
-        public Menu NavigateBack()
+        public async Task<Message> ShowPagingMenu<T>(
+            long userId, string title, 
+            List<T> values, Func<T, string> itemTextSelector, 
+            string pageType, int pageSize = 3, int? messageId = null)
         {
-            if (_menuHistory.TryPeek(out var menu))
-            { 
-            
-            }
-            return menu;
+            var paging = new Paging<T>(values, itemTextSelector, $"{pageType}_", pageSize);
+
+            _userDataStorage.SavePagination(userId, pageType, paging);
+
+            var markup = paging.GetPageMarkup(0);
+
+            if (messageId.HasValue)
+                return await _botMessenger.EditMessageText(userId, messageId.Value, title, markup);
+            else
+                return await _botMessenger.SendMessage(userId, title, markup);
         }
 
-        public void ClearHistory()
-        {
-            _menuHistory.Clear();
-        }
-        private void HandlePaginationAction<T>(
+        public async Task HandlePaginationAction<T>(
             long userId, long chatId, int messageId,
             string pageType, string action, string data,
             Action<T> onItemSelected)
         {
-            var paging = _paginationState.GetPagination<T>(userId, pageType);
+            var paging = _userDataStorage.GetPagination<T>(userId, pageType);
             if (paging == null) return;
 
             switch (action)
@@ -52,7 +101,7 @@ namespace RaceWriterBot.Managers
                     if (int.TryParse(data, out var pageNumber))
                     {
                         var markup = paging.GetPageMarkup(pageNumber);
-                        _botMessenger.EditMessageReplyMarkup(chatId, messageId, markup);
+                        await _botMessenger.EditMessageReplyMarkup(chatId, messageId, markup);
                     }
                     break;
 
@@ -60,54 +109,33 @@ namespace RaceWriterBot.Managers
                     var selectedItem = paging.GetItem(data);
                     if (selectedItem != null)
                     {
-                        SaveNavigationState(userId, pageType, selectedItem);
                         onItemSelected(selectedItem);
                     }
                     break;
 
                 case "back":
-                    NavigateBack(userId, chatId, messageId);
+                    await NavigateBack(userId, messageId);
                     break;
             }
         }
 
-        private void SaveNavigationState<T>(long userId, string pageType, T context)
+        public async Task<Message> NavigateBack(long userId, int messageId)
         {
-            if (!_navigationHistory.TryGetValue(userId, out var history))
-            {
-                history = new Stack<(string pageType, object context)>();
-                _navigationHistory[userId] = history;
-            }
+            var history = _userDataStorage.GetMenuHistory(userId);
 
-            history.Push((pageType, context));
+            if (history.Count == 0)
+            {
+                throw new NotImplementedException();
+            }
+            var menu = history.Pop();
+            var markup = menu.GetMarkup();
+
+            return await _botMessenger.EditMessageText(userId, messageId, menu.Text, markup);
         }
 
-        private void NavigateBack(long userId, long chatId, int messageId)
+        public void ClearHistory()
         {
-            if (!_navigationHistory.TryGetValue(userId, out var history) || history.Count == 0)
-            {
-                Settings(userId);
-                return;
-            }
-
-            var (previousPageType, previousContext) = history.Pop();
-
-            switch (previousPageType)
-            {
-                case Constants.CommandNames.CHANNELS_PAGE:
-                    Settings(userId);
-                    break;
-
-                case Constants.CommandNames.HASHTAGS_PAGE:
-                    if (previousContext is TargetChatSession session)
-                        ShowHashtags(userId, session, messageId);
-                    break;
-
-                case Constants.CommandNames.MESSAGES_PAGE:
-                    if (previousContext is HashtagSession hashtag)
-                        ShowTemplateMessage(userId, hashtag, messageId);
-                    break;
-            }
+            
         }
     }
 }

@@ -4,11 +4,13 @@ using RaceWriterBot.Models;
 
 namespace RaceWriterBot.Infrastructure
 {
+
     public class UserDataStorage : IUserDataStorage
     {
         private readonly Dictionary<long, UserSession> _userSessions = [];
         private readonly Dictionary<long, Stack<Menu>> _userMenuHistory = [];
         private readonly Dictionary<long, IDialogState> _userDialogs = [];
+        private readonly Dictionary<long, Dictionary<string, object>> _userPaginations = [];
 
         public UserDataStorage()
         {
@@ -63,6 +65,34 @@ namespace RaceWriterBot.Infrastructure
             return _userDialogs.TryGetValue(userId, out var dialog) ? dialog : null;
         }
 
+        public void SavePagination<T>(long userId, string paginationType, Paging<T> paging)
+        {
+            if (!_userPaginations.TryGetValue(userId, out var paginations))
+            {
+                paginations = new Dictionary<string, object>();
+                _userPaginations[userId] = paginations;
+            }
+
+            paginations[paginationType] = paging;
+        }
+
+        public Paging<T> GetPagination<T>(long userId, string pagionationType)
+        {
+            if (_userPaginations.TryGetValue(userId, out var paginations) &&
+                paginations.TryGetValue(pagionationType, out var paging) &&
+                paging is Paging<T> typedPaging)
+            {
+                return typedPaging;
+            }
+
+            return null;
+        }
+
+
+
+
+
+
         public IReadOnlyList<TargetChatSession> GetTargetChatSessions(long userId)
         {
             return GetUserSession(userId).TargetChats;
@@ -102,6 +132,4 @@ namespace RaceWriterBot.Infrastructure
         }
 
     }
-
-
 }

@@ -4,14 +4,11 @@ namespace RaceWriterBot.Infrastructure
 {
     public class Paging<T>
     {
-        
         private readonly List<T> _values;
         private readonly Func<T, string> _itemTextSelector;
         private readonly string _callbackPrefix;
         public int PageSize { get; }
-
         public int TotalPages { get; }
-
 
         public Paging(
             List<T> values, 
@@ -59,11 +56,8 @@ namespace RaceWriterBot.Infrastructure
             if (page < totalPages - 1)
                 navButtons.Add(InlineKeyboardButton.WithCallbackData(Constants.CommandNames.Next, $"{_callbackPrefix}page_{page + 1}"));
 
-            if (navButtons.Any())
+            if (navButtons.Count != 0)
                 rows.Add(navButtons);
-
-            rows.Add(new List<InlineKeyboardButton> {
-                InlineKeyboardButton.WithCallbackData("Назад", $"{_callbackPrefix}{Constants.CommandNames.ACTION_BACK}") });
 
             return new InlineKeyboardMarkup(rows);
         }

@@ -1,4 +1,5 @@
-﻿using RaceWriterBot.Models;
+﻿using RaceWriterBot.Interfaces;
+using RaceWriterBot.Models;
 
 namespace RaceWriterBot.Managers
 {
