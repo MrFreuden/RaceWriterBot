@@ -1,52 +1,10 @@
 ﻿using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
-using System.Threading.Tasks;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Managers
 {
-    public class Menu
-    {
-        public string Text;
-        public Dictionary<string, string> ButtonsData = [];
-        public const int MaxPerRow = 3;
-        public const int MaxDataRows = 2;
-
-        public InlineKeyboardMarkup GetMarkup()
-        {
-            var rows = new List<List<InlineKeyboardButton>>();
-            var currentRow = new List<InlineKeyboardButton>();
-
-            foreach (var button in ButtonsData)
-            {
-                currentRow.Add(InlineKeyboardButton.WithCallbackData(button.Key, button.Value));
-
-                if (currentRow.Count == MaxPerRow)
-                {
-                    rows.Add(currentRow);
-                    currentRow = [];
-                }
-            }
-
-            if (currentRow.Count > 0)
-            {
-                rows.Add(currentRow);
-            }
-
-            rows.Add([InlineKeyboardButton.WithCallbackData("Назад", $"{Constants.CommandNames.ACTION_BACK}")]);
-
-            return new InlineKeyboardMarkup(rows);
-        }
-
-        public Menu AddButton(string text, string callbackData)
-        {
-            ButtonsData[text] = callbackData;
-            return this;
-        }
-    }
-
     public class MenuManager
     {
         private readonly IBotMessenger _botMessenger;
@@ -71,8 +29,8 @@ namespace RaceWriterBot.Managers
         }
 
         public async Task<Message> ShowPagingMenu<T>(
-            long userId, string title, 
-            List<T> values, Func<T, string> itemTextSelector, 
+            long userId, string title,
+            List<T> values, Func<T, string> itemTextSelector,
             string pageType, int pageSize = 3, int? messageId = null)
         {
             var paging = new Paging<T>(values, itemTextSelector, $"{pageType}_", pageSize);
@@ -135,7 +93,7 @@ namespace RaceWriterBot.Managers
 
         public void ClearHistory()
         {
-            
+
         }
     }
 }
