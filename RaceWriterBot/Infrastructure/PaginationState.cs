@@ -1,4 +1,4 @@
-﻿namespace RaceWriterBot.Temp
+﻿namespace RaceWriterBot.Infrastructure
 {
     public class PaginationState
     {

@@ -1,6 +1,6 @@
 using Moq;
 using RaceWriterBot;
-using RaceWriterBot.Temp;
+using RaceWriterBot.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 

@@ -1,4 +1,4 @@
-﻿namespace RaceWriterBot.Temp
+﻿namespace RaceWriterBot.Models
 {
     public class UserSession
     {

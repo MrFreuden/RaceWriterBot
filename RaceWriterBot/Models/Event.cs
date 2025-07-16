@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaceWriterBot.Temp
+namespace RaceWriterBot.Models
 {
     public class Event
     {

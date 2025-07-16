@@ -1,8 +1,15 @@
-﻿namespace RaceWriterBot.Temp
+﻿using RaceWriterBot.Interfaces;
+using RaceWriterBot.Managers;
+using RaceWriterBot.Models;
+
+namespace RaceWriterBot.Infrastructure
 {
     public class UserDataStorage : IUserDataStorage
     {
-        private Dictionary<long, UserSession> _usersSessions = [];
+        private readonly Dictionary<long, UserSession> _userSessions = [];
+        private readonly Dictionary<long, Stack<Menu>> _userMenuHistory = [];
+        private readonly Dictionary<long, IDialogState> _userDialogs = [];
+
         public UserDataStorage()
         {
             var defaultUser = new UserSession { UserChatId = 190866300 };
@@ -14,20 +21,46 @@
             defaultUser.AddTargetChatSession(new TargetChatSession("Test6", 128));
             defaultUser.AddTargetChatSession(new TargetChatSession("Test7", 129));
 
-            _usersSessions.Add(190866300, defaultUser);
+            _userSessions.Add(190866300, defaultUser);
         }
 
-        public void AddNewUser(long userId)
+        public void AddUserSession(long userId)
         {
-            if (!_usersSessions.ContainsKey(userId))
-                _usersSessions.Add(userId, new UserSession() { UserChatId = userId });
+            if (!_userSessions.ContainsKey(userId))
+                _userSessions.Add(userId, new UserSession() { UserChatId = userId });
         }
 
         public UserSession GetUserSession(long userId)
         {
-            return _usersSessions.TryGetValue(userId, out var session)
+            return _userSessions.TryGetValue(userId, out var session)
             ? session
             : throw new InvalidOperationException("User not found");
+        }
+
+        public void AddMenuHistory(long userId, Menu menu)
+        {
+            if (!_userMenuHistory.ContainsKey(userId))
+                _userMenuHistory[userId] = new Stack<Menu>();
+
+            _userMenuHistory[userId].Push(menu);
+        }
+
+        public Stack<Menu> GetMenuHistory(long userId)
+        {
+            if (!_userMenuHistory.ContainsKey(userId))
+                _userMenuHistory[userId] = new Stack<Menu>();
+
+            return _userMenuHistory[userId];
+        }
+
+        public void AddUserDialog(long userId, IDialogState dialogState)
+        {
+            _userDialogs[userId] = dialogState;
+        }
+
+        public IDialogState GetUserDialog(long userId)
+        {
+            return _userDialogs.TryGetValue(userId, out var dialog) ? dialog : null;
         }
 
         public IReadOnlyList<TargetChatSession> GetTargetChatSessions(long userId)
@@ -70,15 +103,5 @@
 
     }
 
-    public interface IUserDataStorage
-    {
-        void AddNewUser(long userId);
-        UserSession GetUserSession(long userId);
-        IReadOnlyList<TargetChatSession> GetTargetChatSessions(long userId);
-        IReadOnlyList<HashtagSession> GetHashtagSessions(long userId, long targetChatId);
-        void AddTargetChatSession(long userId, TargetChatSession targetChatSession);
-        void AddHashtagSession(long userId, long targetChatId, HashtagSession hashtag);
-        void UpdateHashtagTemplate(long userId, string hashtagName, string newTemplate);
-        void UpdateHashtagName(long userId, string hashtagName, string newName);
-    }
+
 }

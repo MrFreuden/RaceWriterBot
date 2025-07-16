@@ -1,6 +1,7 @@
 using Moq;
-using RaceWriterBot.asdfadgfh;
-using RaceWriterBot.Temp;
+using RaceWriterBot.Handlers;
+using RaceWriterBot.Infrastructure;
+using RaceWriterBot.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;

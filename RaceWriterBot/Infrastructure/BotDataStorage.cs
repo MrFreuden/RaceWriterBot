@@ -1,5 +1,4 @@
-﻿
-namespace RaceWriterBot.Temp
+﻿namespace RaceWriterBot.Infrastructure
 {
     public class BotDataStorage : IBotDataStorage
     {

@@ -1,6 +1,6 @@
 using Moq;
 using RaceWriterBot;
-using RaceWriterBot.Temp;
+using RaceWriterBot.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 namespace RaceWriterTests
@@ -14,7 +14,7 @@ namespace RaceWriterTests
 
             await handler.HandleUpdateAsync(dummyBot, update, CancellationToken.None);
 
-            mockUserStorage.Verify(s => s.AddNewUser(testUser.Id), Times.Once);
+            mockUserStorage.Verify(s => s.AddUserSession(testUser.Id), Times.Once);
 
             mockMessenger.Verify(b => b.SendMessage(
                 It.Is<ChatId>(c => c.Identifier == testUser.Id),

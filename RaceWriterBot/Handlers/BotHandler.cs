@@ -1,9 +1,10 @@
-﻿using RaceWriterBot.asdfadgfh;
+﻿using RaceWriterBot.Infrastructure;
+using RaceWriterBot.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Temp
+namespace RaceWriterBot.Handlers
 {
     public interface ICustomUpdateHandler
     {

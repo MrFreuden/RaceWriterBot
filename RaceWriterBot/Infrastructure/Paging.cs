@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.Types.ReplyMarkups;
 
-namespace RaceWriterBot.Temp
+namespace RaceWriterBot.Infrastructure
 {
     public class Paging<T>
     {
