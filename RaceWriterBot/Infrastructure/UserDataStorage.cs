@@ -87,9 +87,19 @@ namespace RaceWriterBot.Infrastructure
             return null;
         }
 
+        public TargetChatSession GetTargetChatSession(long userId, long targetChatId)
+        {
 
+        }
 
-
+        public HashtagSession? GetHashtagSession(long userId, string hashtagName)
+        {
+            var userSession = GetUserSession(userId);
+            var hashtag = userSession.TargetChats
+                .SelectMany(c => c.Hashtags)
+                .FirstOrDefault(h => h.HashtagName == hashtagName);
+            return hashtag;
+        }
 
 
         public IReadOnlyList<TargetChatSession> GetTargetChatSessions(long userId)

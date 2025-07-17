@@ -1,6 +1,6 @@
 ﻿using RaceWriterBot.Interfaces;
+using RaceWriterBot.Managers;
 using RaceWriterBot.Models;
-using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -13,7 +13,6 @@ namespace RaceWriterBot.Infrastructure
         private readonly IBotDataStorage _botStorage;
         private readonly IBotMessenger _botMessenger;
         private readonly IDialogProcessor _dialogProcessor;
-        private readonly PaginationState _paginationState = new();
         private readonly Dictionary<long, Stack<(string pageType, object context)>> _navigationHistory = new();
 
         public UpdateProcessor(IBotMessenger botMessenger) : this(

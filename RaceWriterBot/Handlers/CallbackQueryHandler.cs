@@ -1,9 +1,19 @@
-﻿using Telegram.Bot.Types;
+﻿using RaceWriterBot.Interfaces;
+using RaceWriterBot.Managers;
+using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Handlers
 {
     public class CallbackQueryHandler
     {
+        private readonly IUserDataStorage _userDataStorage;
+        private readonly MenuManager _menuManager;
+
+        public CallbackQueryHandler(IUserDataStorage userDataStorage)
+        {
+            _userDataStorage = userDataStorage;
+        }
+
         public Task ProcessCallbackQuery(CallbackQuery query)
         {
             if (query.Data.StartsWith("EditTemplateMessageText_"))
@@ -69,10 +79,7 @@ namespace RaceWriterBot.Handlers
 
         private void StartEditHashtagTemplate(long userId, string hashtagName, int messageId)
         {
-            var userSession = _userDataStorage.GetUserSession(userId);
-            var hashtag = userSession.TargetChats
-                .SelectMany(c => c.Hashtags)
-                .FirstOrDefault(h => h.HashtagName == hashtagName);
+            var hashtag = _userDataStorage.GetHashtagSession(userId, hashtagName);
             if (hashtag == null)
             {
                 _botMessenger.SendMessage(

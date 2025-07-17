@@ -93,7 +93,7 @@ namespace RaceWriterBot.Managers
 
         public void ClearHistory()
         {
-
+            throw new NotImplementedException();
         }
     }
 }

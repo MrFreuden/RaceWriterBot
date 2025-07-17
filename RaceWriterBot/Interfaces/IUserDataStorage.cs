@@ -19,5 +19,6 @@ namespace RaceWriterBot.Interfaces
         void SavePagination<T>(long userId, string paginationType, Paging<T> paging);
         void UpdateHashtagName(long userId, string hashtagName, string newName);
         void UpdateHashtagTemplate(long userId, string hashtagName, string newTemplate);
+        HashtagSession? GetHashtagSession(long userId, string hashtagName);
     }
 }
