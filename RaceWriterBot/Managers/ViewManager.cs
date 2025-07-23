@@ -1,12 +1,20 @@
 ﻿using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
-using RaceWriterBot.Temp;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Managers
 {
     public class ViewManager : IViewManager
     {
+        private readonly IUserDataStorage _userDataStorage;
+        private readonly MenuManager _menuManager;
+        private const int CountObjectsPerPage = 3;
+
+        public ViewManager(MenuManager menuManager, IUserDataStorage userDataStorage)
+        {
+            _userDataStorage = userDataStorage;
+            _menuManager = menuManager;
+        }
+
         public void Settings(long chatId)
         {
             var targetChatSessions = _userDataStorage.GetTargetChatSessions(chatId);
@@ -14,27 +22,20 @@ namespace RaceWriterBot.Managers
             {
                 if (targetChatSessions.Count == 0)
                 {
-                    _botMessenger.SendMessage(chatId, "У вас немає активних каналів",
-                        replyMarkup: new InlineKeyboardButton[][]
-                        {
-                            [("Створити", Constants.CommandNames.ACTION_CREATE_TARGET_CHAT)]
-                        });
+                    var menu = new Menu
+                    {
+                        Text = "У вас немає активних каналів",
+                        ButtonsData = { ["Створити"] = Constants.CommandNames.ACTION_CREATE_TARGET_CHAT }
+                    };
+                    _menuManager.ShowMenu(chatId, menu);
                 }
                 else
                 {
-                    var paging = new Paging<TargetChatSession>(
-                        targetChatSessions.ToList(),
-                        session => session.Name,
-                        $"{Constants.CommandNames.CHANNELS_PAGE}_",
-                        CountObjectsPerPage);
-
-                    _paginationState.SavePagination(chatId, Constants.CommandNames.CHANNELS_PAGE, paging);
-
-                    var keyboard = paging.GetPageMarkup(0);
-                    _botMessenger.SendMessage(chatId, "Активні канали", keyboard);
+                    _menuManager.ShowPagingMenu(chatId, "Активні канали", targetChatSessions.ToList(), session => session.Name, Constants.CommandNames.CHANNELS_PAGE, CountObjectsPerPage);
                 }
             }
         }
+
         public void ShowMessageDetails(long userId, PostMessagePair pair, int messageId)
         {
             throw new NotImplementedException();
@@ -42,9 +43,12 @@ namespace RaceWriterBot.Managers
 
         public void ShowTemplateMessage(long userId, HashtagSession hashtag, int messageId)
         {
-            var text = hashtag.TextTemplate;
-            var markup = new InlineKeyboardButton("Редагувати", $"EditTemplateMessageText_{hashtag.HashtagName}");
-            _botMessenger.EditMessageText(userId, messageId, text, markup);
+            var menu = new Menu
+            {
+                Text = hashtag.TextTemplate,
+                ButtonsData = { ["Редагувати"] = $"EditTemplateMessageText_{hashtag.HashtagName}" },
+            };
+            _menuManager.ShowMenu(userId, menu, messageId);
         }
 
         public void ShowHashtags(long userId, TargetChatSession channel, int messageId)
@@ -53,26 +57,16 @@ namespace RaceWriterBot.Managers
 
             if (hashtags == null || hashtags.Count == 0)
             {
-                var keyboard = new InlineKeyboardButton("Створити", $"AddHashtag_{channel.GetHashCode()}");
-
-                _botMessenger.EditMessageText(
-                    userId,
-                    messageId,
-                    $"Канал {channel.Name} не має хештегів",
-                    keyboard);
+                var menu = new Menu
+                {
+                    Text = $"Канал {channel.Name} не має хештегів",
+                    ButtonsData = { ["Створити"] = $"AddHashtag_{channel.GetHashCode()}" }
+                };
+                _menuManager.ShowMenu(userId, menu, messageId);
                 return;
             }
 
-            var paging = new Paging<HashtagSession>(
-                hashtags.ToList(),
-                hashtag => hashtag.HashtagName,
-                $"{Constants.CommandNames.HASHTAGS_PAGE}_",
-                CountObjectsPerPage);
-
-            _paginationState.SavePagination(userId, Constants.CommandNames.HASHTAGS_PAGE, paging);
-
-            var markup = paging.GetPageMarkup(0);
-            _botMessenger.EditMessageText(userId, messageId, $"Хештеги для каналу {channel.Name}:", markup);
+            _menuManager.ShowPagingMenu(userId, $"Хештеги для каналу {channel.Name}:", hashtags.ToList(), hashtag => hashtag.HashtagName, Constants.CommandNames.HASHTAGS_PAGE, CountObjectsPerPage, messageId);
         }
 
     }
