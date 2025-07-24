@@ -15,65 +15,60 @@ namespace RaceWriterBot.Managers
 
         public bool HasActiveDialog(long userId)
         {
-            var dialog = _userDataStorage.GetCurrentDialog(userId);
+            var dialog = _userDataStorage.GetUser(userId).GetCurrentDialog();
             return dialog != default;
         }
 
-        public void ProcessDialogMessage(long userId, Message message)
+        public bool ProcessDialogMessage(long userId, Message message)
         {
-            var dialog = _userDataStorage.GetCurrentDialog(userId);
-            switch (dialog.ExpectedAction)
+            var dialog = _userDataStorage.GetUser(userId).GetCurrentDialog();
+            return dialog.ExpectedAction switch
             {
-                case Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE:
-                    ProcessHashtagTemplateEdit(message);
-                    break;
-
-                case Constants.CommandNames.ACTION_ADD_HASHTAG:
-                    ProcessHashtagAdd(message);
-                    break;
-
-                case Constants.CommandNames.ACTION_EDIT_HASHTAG:
-                    ProcessHashtagEdit(message);
-                    break;
-            }
+                Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE => ProcessHashtagTemplateEdit(message),
+                Constants.CommandNames.ACTION_ADD_HASHTAG => ProcessHashtagAdd(message),
+                Constants.CommandNames.ACTION_EDIT_HASHTAG => ProcessHashtagEdit(message),
+                _ => false,
+            };
         }
 
-        public void ProcessHashtagAdd(Message message)
+        private bool ProcessHashtagAdd(Message message)
         {
-            var userId = message.From.Id;
-            if (_userDataStorage.TryGetDialogState(userId, out TargetChatSession chatSession, out _))
+            var user = _userDataStorage.GetUser(message.From.Id);
+            if (user.TryGetDialogState(out TargetChatSession chatSession, out _))
             {
-                _userDataStorage.ClearDialog(userId);
-
-
+                user.ClearDialog();
+                
                 if (chatSession != null)
                 {
-                    //TODO
                     var hash = new HashtagSession() { HashtagName = message.Text };
-                    _userDataStorage.AddHashtagSession(userId, chatSession.TargetChatId, hash);
+                    user.AddHashtagSession(chatSession.TargetChatId, hash);
+                    return true;
                 }
             }
+            return false;
         }
 
-        public void ProcessHashtagEdit(Message message)
+        private bool ProcessHashtagEdit(Message message)
         {
-
+            return false;
         }
 
-        public void ProcessHashtagTemplateEdit(Message message)
+        private bool ProcessHashtagTemplateEdit(Message message)
         {
+            var user = _userDataStorage.GetUser(message.From.Id);
             var userId = message.From.Id;
-            if (_userDataStorage.TryGetDialogState(userId, out HashtagSession hashtag, out _))
+            if (user.TryGetDialogState(out HashtagSession hashtag, out _))
             {
-                _userDataStorage.ClearDialog(userId);
-
+                user.ClearDialog();
 
                 if (hashtag != null)
                 {
                     hashtag.TextTemplate = message.Text;
-                    _userDataStorage.UpdateHashtagTemplate(userId, hashtag.HashtagName, hashtag.TextTemplate);
+                    user.UpdateHashtagTemplate(hashtag.HashtagName, hashtag.TextTemplate);
+                    return true;
                 }
             }
+            return false;
         }
     }
 }

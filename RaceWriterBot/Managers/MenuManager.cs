@@ -18,7 +18,7 @@ namespace RaceWriterBot.Managers
 
         public async Task<Message> ShowMenu(long userId, Menu menu, int? messageId = null)
         {
-            _userDataStorage.AddMenuHistory(userId, menu);
+            _userDataStorage.GetUser(userId).AddMenuHistory(menu);
 
             var markup = menu.GetMarkup();
 
@@ -35,7 +35,7 @@ namespace RaceWriterBot.Managers
         {
             var paging = new Paging<T>(values, itemTextSelector, $"{pageType}_", pageSize);
 
-            _userDataStorage.SavePagination(userId, pageType, paging);
+            _userDataStorage.GetUser(userId).SavePagination(pageType, paging);
 
             var markup = paging.GetPageMarkup(0);
 
@@ -50,7 +50,7 @@ namespace RaceWriterBot.Managers
             string pageType, string action, string data,
             Action<T> onItemSelected)
         {
-            var paging = _userDataStorage.GetPagination<T>(userId, pageType);
+            var paging = _userDataStorage.GetUser(userId).GetPagination<T>(pageType);
             if (paging == null) return;
 
             switch (action)
@@ -77,9 +77,9 @@ namespace RaceWriterBot.Managers
             }
         }
 
-        public async Task<Message> NavigateBack(long userId, int messageId)
+        public async Task<Message> NavigateBack(long userId, int? messageId = null)
         {
-            var history = _userDataStorage.GetMenuHistory(userId);
+            var history = _userDataStorage.GetUser(userId).GetMenuHistory();
 
             if (history.Count == 0)
             {
@@ -88,7 +88,11 @@ namespace RaceWriterBot.Managers
             var menu = history.Pop();
             var markup = menu.GetMarkup();
 
-            return await _botMessenger.EditMessageText(userId, messageId, menu.Text, markup);
+            if (messageId.HasValue)
+            {
+                return await _botMessenger.EditMessageText(userId, messageId.Value, menu.Text, markup);
+            }
+            return await _botMessenger.SendMessage(userId, menu.Text, markup);
         }
 
         public void ClearHistory()

@@ -20,7 +20,7 @@ namespace RaceWriterBot.Managers
 
         public void Settings(long chatId)
         {
-            var targetChatSessions = _userDataStorage.GetTargetChatSessions(chatId);
+            var targetChatSessions = _userDataStorage.GetUser(chatId).GetTargetChatSessions();
             if (targetChatSessions != null)
             {
                 if (targetChatSessions.Count == 0)
@@ -56,7 +56,7 @@ namespace RaceWriterBot.Managers
 
         public void ShowHashtags(long userId, TargetChatSession channel, int messageId)
         {
-            var hashtags = _userDataStorage.GetHashtagSessions(userId, channel.TargetChatId);
+            var hashtags = _userDataStorage.GetUser(userId).GetHashtagSessions(channel.TargetChatId);
 
             if (hashtags == null || hashtags.Count == 0)
             {

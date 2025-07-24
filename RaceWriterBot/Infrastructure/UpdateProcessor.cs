@@ -7,13 +7,11 @@ namespace RaceWriterBot.Infrastructure
 {
     public class UpdateProcessor
     {
-        private const int CountObjectsPerPage = 3;
         private readonly IUserDataStorage _userDataStorage;
         private readonly IBotDataStorage _botStorage;
         private readonly IBotMessenger _botMessenger;
         private readonly IDialogProcessor _dialogProcessor;
         private readonly IViewManager _viewManager;
-        private readonly Dictionary<long, Stack<(string pageType, object context)>> _navigationHistory = new();
 
         public UpdateProcessor(
             IBotMessenger botMessenger,
@@ -33,7 +31,14 @@ namespace RaceWriterBot.Infrastructure
             {
                 if (_dialogProcessor.HasActiveDialog(message.From.Id))
                 {
-                    _dialogProcessor.ProcessDialogMessage(message.From.Id, message);
+                    if (_dialogProcessor.ProcessDialogMessage(message.From.Id, message))
+                    {
+                        _viewManager.ReturnToPreviousMenu();
+                    }
+                    else
+                    {
+                        _viewManager.ShowErrorMessage();
+                    }
                     return Task.CompletedTask;
                 }
                 if (IsForwardedMessage(message))
@@ -76,7 +81,7 @@ namespace RaceWriterBot.Infrastructure
             switch (message.Text)
             {
                 case "/start":
-                    _userDataStorage.AddUserSession(message.Chat.Id);
+                    _userDataStorage.AddUser(message.Chat.Id);
                     _botMessenger.SendMessage(message.Chat.Id, "Ласкаво просимо");
                     _viewManager.Settings(message.Chat.Id);
                     break;
@@ -91,14 +96,14 @@ namespace RaceWriterBot.Infrastructure
 
         private void RegisterNewTargetChat(Message message)
         {
-            _userDataStorage.AddTargetChatSession(message.From.Id, new TargetChatSession(message.ForwardFromChat.Title, message.ForwardFromChat.Id));
+            _userDataStorage.GetUser(message.From.Id).AddTargetChatSession(message.ForwardFromChat.Id, message.ForwardFromChat.Title);
         }
 
 
 
         private void CheckAccess(Message forwardedMessage)
         {
-            if (_botStorage.AddOwner(forwardedMessage.From.Id, forwardedMessage.Chat.Id))
+            if (_botStorage.AddOwner(forwardedMessage.From.Id, forwardedMessage.ForwardFromChat.Id))
             {
                 RegisterNewTargetChat(forwardedMessage);
                 _botMessenger.SendMessage(forwardedMessage.From.Id, "Успiх");

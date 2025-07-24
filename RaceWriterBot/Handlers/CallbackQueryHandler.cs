@@ -59,7 +59,8 @@ namespace RaceWriterBot.Handlers
                 case Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT:
                     _viewManager.RequestForwardedMessage(query.From.Id);
                     break;
-                case "3":
+                case Constants.CommandNames.ACTION_BACK:
+                    _menuManager.NavigateBack(query.From.Id);
                     break;
                 case "4":
                     break;
@@ -101,14 +102,12 @@ namespace RaceWriterBot.Handlers
 
         private void AddNewHashtag(long userId, int channelHash, int messageId)
         {
-            var userSession = _userDataStorage.GetUserSession(userId);
-            var channelSession = _userDataStorage.GetTargetChatSessions(userId)
-                .Where(s => s.GetHashCode() == channelHash)
-                .FirstOrDefault();
+            var user = _userDataStorage.GetUser(userId);
+            var channelSession = user.GetTargetChatSessions(channelHash);
 
             if (channelSession != null)
             {
-                _userDataStorage.SetExpectedAction(userId, Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
+                user.SetExpectedAction(Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
 
                 _botMessenger.SendMessage(
                     userId,
@@ -118,7 +117,8 @@ namespace RaceWriterBot.Handlers
 
         private void StartEditHashtagTemplate(long userId, string hashtagName, int messageId)
         {
-            var hashtag = _userDataStorage.GetHashtagSession(userId, hashtagName);
+            var user = _userDataStorage.GetUser(userId);
+            var hashtag = user.GetHashtagSession(hashtagName);
             if (hashtag == null)
             {
                 _botMessenger.SendMessage(
@@ -127,7 +127,7 @@ namespace RaceWriterBot.Handlers
                 return;
             }
 
-            _userDataStorage.SetExpectedAction(userId, Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
+            user.SetExpectedAction(Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
 
             _botMessenger.SendMessage(
                 userId,

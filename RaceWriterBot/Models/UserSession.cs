@@ -6,6 +6,11 @@
         public IReadOnlyList<TargetChatSession> TargetChats { get { return _targetChats.AsReadOnly(); } }
         public long UserChatId { get; set; }
 
+        public UserSession(long userChatId)
+        {
+            UserChatId = userChatId;
+        }
+
         public void AddTargetChatSession(TargetChatSession chat)
         {
             if (_targetChats.Any(c => c.TargetChatId == chat.TargetChatId))
