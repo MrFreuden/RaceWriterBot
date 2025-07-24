@@ -1,5 +1,6 @@
 ﻿using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
+using RaceWriterBot.Managers;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -42,10 +43,12 @@ namespace RaceWriterBot.Handlers
     public class BotHandler : ICustomUpdateHandler
     {
         private UpdateProcessor _updateProcessor;
+        private CallbackQueryHandler _callbackQueryHandler;
 
-        public BotHandler(IBotMessenger botMessenger, IBotDataStorage botDataStorage, IUserDataStorage userDataStorage)
+        public BotHandler(IBotMessenger botMessenger, IBotDataStorage botDataStorage, IUserDataStorage userDataStorage, IViewManager viewManager, MenuManager menuManager, IDialogProcessor dialogProcessor)
         {
-            _updateProcessor = new UpdateProcessor(botMessenger, userDataStorage, botDataStorage);
+            _updateProcessor = new UpdateProcessor(botMessenger, userDataStorage, botDataStorage, viewManager);
+            _callbackQueryHandler = new CallbackQueryHandler(userDataStorage, botDataStorage, botMessenger, dialogProcessor, viewManager, menuManager);
         }
 
         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
@@ -57,7 +60,7 @@ namespace RaceWriterBot.Handlers
                 { Message: { } message } => _updateProcessor.ProcessMessage(message),
                 //{ EditedMessage: { } message } => _updateProcessor.ProcessEditMessage(message),
                 { MyChatMember: { } myChatMember } => _updateProcessor.ProcessChatMember(myChatMember),
-                { CallbackQuery: { } callbackQuery } => _updateProcessor.ProcessCallbackQuery(callbackQuery),
+                { CallbackQuery: { } callbackQuery } => _callbackQueryHandler.ProcessCallbackQuery(callbackQuery),
                 //{ InlineQuery: { } inlineQuery } => OnInlineQuery(inlineQuery),
                 //{ ChosenInlineResult: { } chosenInlineResult } => OnChosenInlineResult(chosenInlineResult),
                 _ => UnknownUpdateHandlerAsync(update)

@@ -20,5 +20,10 @@ namespace RaceWriterBot.Interfaces
         void UpdateHashtagName(long userId, string hashtagName, string newName);
         void UpdateHashtagTemplate(long userId, string hashtagName, string newTemplate);
         HashtagSession? GetHashtagSession(long userId, string hashtagName);
+        void SetExpectedAction<T>(long userId, string action, T context = default);
+        IDialogState? GetCurrentDialog(long userId);
+        T GetDialogContext<T>(long userId);
+        bool TryGetDialogState<T>(long userId, out T context, out string action);
+        void ClearDialog(long userId);
     }
 }

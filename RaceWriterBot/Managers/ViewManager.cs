@@ -1,5 +1,8 @@
 ﻿using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
+using System.Threading.Channels;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Managers
 {
@@ -69,5 +72,23 @@ namespace RaceWriterBot.Managers
             _menuManager.ShowPagingMenu(userId, $"Хештеги для каналу {channel.Name}:", hashtags.ToList(), hashtag => hashtag.HashtagName, Constants.CommandNames.HASHTAGS_PAGE, CountObjectsPerPage, messageId);
         }
 
+        public void AddBotToTargetChatSettings(long chatId)
+        {
+            var menu = new Menu
+            {
+                Text = $"Додайте бота в чат обговорень каналу та дайте йому права адміністратора",
+                ButtonsData = { ["Зроблено"] = Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT }
+            };
+            _menuManager.ShowMenu(chatId, menu);
+        }
+
+        public void RequestForwardedMessage(long chatId)
+        {
+            var menu = new Menu
+            {
+                Text = $"Надішліть будь-яке повідомлення з чату обговорень",
+            };
+            _menuManager.ShowMenu(chatId, menu);
+        }
     }
 }

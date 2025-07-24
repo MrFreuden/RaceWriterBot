@@ -6,16 +6,22 @@ namespace RaceWriterBot.Managers
 {
     public class DialogProcessor : IDialogProcessor
     {
-        private readonly UserDialogManager _dialogManager = new();
+        private readonly IUserDataStorage _userDataStorage;
+
+        public DialogProcessor(IUserDataStorage userDataStorage)
+        {
+            _userDataStorage = userDataStorage;
+        }
+
         public bool HasActiveDialog(long userId)
         {
-            var dialog = _dialogManager.GetCurrentDialog(userId);
+            var dialog = _userDataStorage.GetCurrentDialog(userId);
             return dialog != default;
         }
 
         public void ProcessDialogMessage(long userId, Message message)
         {
-            var dialog = _dialogManager.GetCurrentDialog(userId);
+            var dialog = _userDataStorage.GetCurrentDialog(userId);
             switch (dialog.ExpectedAction)
             {
                 case Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE:
@@ -35,9 +41,9 @@ namespace RaceWriterBot.Managers
         public void ProcessHashtagAdd(Message message)
         {
             var userId = message.From.Id;
-            if (_dialogManager.TryGetDialogState(userId, out TargetChatSession chatSession, out _))
+            if (_userDataStorage.TryGetDialogState(userId, out TargetChatSession chatSession, out _))
             {
-                _dialogManager.ClearDialog(userId);
+                _userDataStorage.ClearDialog(userId);
 
 
                 if (chatSession != null)
@@ -57,9 +63,9 @@ namespace RaceWriterBot.Managers
         public void ProcessHashtagTemplateEdit(Message message)
         {
             var userId = message.From.Id;
-            if (_dialogManager.TryGetDialogState(userId, out HashtagSession hashtag, out _))
+            if (_userDataStorage.TryGetDialogState(userId, out HashtagSession hashtag, out _))
             {
-                _dialogManager.ClearDialog(userId);
+                _userDataStorage.ClearDialog(userId);
 
 
                 if (hashtag != null)

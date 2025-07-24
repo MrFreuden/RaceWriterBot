@@ -1,5 +1,6 @@
-﻿using RaceWriterBot.asdfadgfh;
-using RaceWriterBot.Temp;
+﻿using RaceWriterBot.Handlers;
+using RaceWriterBot.Infrastructure;
+using RaceWriterBot.Managers;
 using System.Net;
 using Telegram.Bot;
 
@@ -60,7 +61,14 @@ namespace RaceWriterBot
         {
             var bot = new TelegramBotClient(apiToken);
             var messenger = new BotMessenger(bot);
-            var customHandler = new BotHandler(messenger, new BotDataStorage(), new UserDataStorage());
+            var userDataStorage = new UserDataStorage();
+            var menuManger = new MenuManager(messenger, userDataStorage);
+            var viewManager = new ViewManager(menuManger, userDataStorage);
+            var dialogProcessor = new DialogProcessor(userDataStorage);
+            var botDataStorage = new BotDataStorage();
+
+
+            var customHandler = new BotHandler(messenger, botDataStorage, userDataStorage, viewManager, menuManger, dialogProcessor);
             var handler = new UpdateHandlerAdapter(customHandler);
             Console.WriteLine("Starting bot...");
             bot.StartReceiving(handler.HandleUpdateAsync, handler.HandleErrorAsync, cancellationToken: cancellationToken.Token);

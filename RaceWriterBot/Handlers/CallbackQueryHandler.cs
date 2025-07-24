@@ -1,5 +1,7 @@
-﻿using RaceWriterBot.Interfaces;
+﻿using RaceWriterBot.Infrastructure;
+using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
+using RaceWriterBot.Models;
 using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Handlers
@@ -7,11 +9,20 @@ namespace RaceWriterBot.Handlers
     public class CallbackQueryHandler
     {
         private readonly IUserDataStorage _userDataStorage;
+        private readonly IBotDataStorage _botStorage;
+        private readonly IBotMessenger _botMessenger;
+        private readonly IDialogProcessor _dialogProcessor;
+        private readonly IViewManager _viewManager;
         private readonly MenuManager _menuManager;
 
-        public CallbackQueryHandler(IUserDataStorage userDataStorage)
+        public CallbackQueryHandler(IUserDataStorage userDataStorage, IBotDataStorage botStorage, IBotMessenger botMessenger, IDialogProcessor dialogProcessor, IViewManager viewManager, MenuManager menuManager)
         {
             _userDataStorage = userDataStorage;
+            _botStorage = botStorage;
+            _botMessenger = botMessenger;
+            _dialogProcessor = dialogProcessor;
+            _viewManager = viewManager;
+            _menuManager = menuManager;
         }
 
         public Task ProcessCallbackQuery(CallbackQuery query)
@@ -43,10 +54,10 @@ namespace RaceWriterBot.Handlers
             switch (query.Data)
             {
                 case Constants.CommandNames.ACTION_CREATE_TARGET_CHAT:
-                    AddBotToTargetChatSettings(query.From.Id);
+                    _viewManager.AddBotToTargetChatSettings(query.From.Id);
                     break;
                 case Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT:
-                    RequestForwardedMessage(query.From.Id);
+                    _viewManager.RequestForwardedMessage(query.From.Id);
                     break;
                 case "3":
                     break;
@@ -60,6 +71,34 @@ namespace RaceWriterBot.Handlers
             return Task.CompletedTask;
         }
 
+        private void HandlePagination(CallbackQuery query, string pageType, string action, string data)
+        {
+            var userId = query.From.Id;
+            var chatId = query.Message.Chat.Id;
+            var messageId = query.Message.MessageId;
+
+            switch (pageType)
+            {
+                case Constants.CommandNames.CHANNELS_PAGE:
+                    _menuManager.HandlePaginationAction<TargetChatSession>(
+                        userId, chatId, messageId, pageType, action, data,
+                        (session) => _viewManager.ShowHashtags(userId, session, messageId));
+                    break;
+
+                case Constants.CommandNames.HASHTAGS_PAGE:
+                    _menuManager.HandlePaginationAction<HashtagSession>(
+                        userId, chatId, messageId, pageType, action, data,
+                        (hashtag) => _viewManager.ShowTemplateMessage(userId, hashtag, messageId));
+                    break;
+
+                case Constants.CommandNames.MESSAGES_PAGE:
+                    _menuManager.HandlePaginationAction<PostMessagePair>(
+                        userId, chatId, messageId, pageType, action, data,
+                        (pair) => _viewManager.ShowMessageDetails(userId, pair, messageId));
+                    break;
+            }
+        }
+
         private void AddNewHashtag(long userId, int channelHash, int messageId)
         {
             var userSession = _userDataStorage.GetUserSession(userId);
@@ -69,7 +108,7 @@ namespace RaceWriterBot.Handlers
 
             if (channelSession != null)
             {
-                _dialogManager.SetExpectedAction(userId, Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
+                _userDataStorage.SetExpectedAction(userId, Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
 
                 _botMessenger.SendMessage(
                     userId,
@@ -88,7 +127,7 @@ namespace RaceWriterBot.Handlers
                 return;
             }
 
-            _dialogManager.SetExpectedAction(userId, Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
+            _userDataStorage.SetExpectedAction(userId, Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
 
             _botMessenger.SendMessage(
                 userId,
