@@ -27,7 +27,7 @@ namespace RaceWriterBot.Handlers
 
         public Task ProcessCallbackQuery(CallbackQuery query)
         {
-            if (query.Data.StartsWith("EditTemplateMessageText_"))
+            if (query.Data.StartsWith(Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE))
             {
                 var hashtagName = query.Data.Split('_').Last();
                 StartEditHashtagTemplate(query.From.Id, hashtagName, query.Message.MessageId);

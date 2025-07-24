@@ -49,7 +49,7 @@ namespace RaceWriterBot.Managers
             var menu = new Menu
             {
                 Text = hashtag.TextTemplate,
-                ButtonsData = { ["Редагувати"] = $"EditTemplateMessageText_{hashtag.HashtagName}" },
+                ButtonsData = { ["Редагувати"] = $"{Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE}_{hashtag.HashtagName}" },
             };
             _menuManager.ShowMenu(userId, menu, messageId);
         }
@@ -63,7 +63,7 @@ namespace RaceWriterBot.Managers
                 var menu = new Menu
                 {
                     Text = $"Канал {channel.Name} не має хештегів",
-                    ButtonsData = { ["Створити"] = $"AddHashtag_{channel.GetHashCode()}" }
+                    ButtonsData = { ["Створити"] = $"{Constants.CommandNames.ACTION_ADD_HASHTAG}_{channel.GetHashCode()}" }
                 };
                 _menuManager.ShowMenu(userId, menu, messageId);
                 return;
