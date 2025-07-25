@@ -39,22 +39,22 @@ namespace RaceWriterBot.Managers
             }
         }
 
-        public void ShowMessageDetails(long userId, PostMessagePair pair, int messageId)
+        public void ShowMessageDetails(long userId, PostMessagePair pair)
         {
             throw new NotImplementedException();
         }
 
-        public void ShowTemplateMessage(long userId, HashtagSession hashtag, int messageId)
+        public void ShowTemplateMessage(long userId, HashtagSession hashtag)
         {
             var menu = new Menu
             {
                 Text = hashtag.TextTemplate,
                 ButtonsData = { ["Редагувати"] = $"{Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE}_{hashtag.HashtagName}" },
             };
-            _menuManager.ShowMenu(userId, menu, messageId);
+            _menuManager.ShowMenu(userId, menu);
         }
 
-        public void ShowHashtags(long userId, TargetChatSession channel, int messageId)
+        public void ShowHashtags(long userId, TargetChatSession channel)
         {
             var hashtags = _userDataStorage.GetUser(userId).GetHashtagSessions(channel.TargetChatId);
 
@@ -65,11 +65,11 @@ namespace RaceWriterBot.Managers
                     Text = $"Канал {channel.Name} не має хештегів",
                     ButtonsData = { ["Створити"] = $"{Constants.CommandNames.ACTION_ADD_HASHTAG}_{channel.GetHashCode()}" }
                 };
-                _menuManager.ShowMenu(userId, menu, messageId);
+                _menuManager.ShowMenu(userId, menu);
                 return;
             }
 
-            _menuManager.ShowPagingMenu(userId, $"Хештеги для каналу {channel.Name}:", hashtags.ToList(), hashtag => hashtag.HashtagName, Constants.CommandNames.HASHTAGS_PAGE, CountObjectsPerPage, messageId);
+            _menuManager.ShowPagingMenu(userId, $"Хештеги для каналу {channel.Name}:", hashtags.ToList(), hashtag => hashtag.HashtagName, Constants.CommandNames.HASHTAGS_PAGE, CountObjectsPerPage);
         }
 
         public void AddBotToTargetChatSettings(long chatId)
@@ -91,6 +91,18 @@ namespace RaceWriterBot.Managers
             _menuManager.ShowMenu(chatId, menu);
         }
 
+        public void ReturnToPreviousMenu(long chatId)
+        {
+            _menuManager.NavigateBack(chatId);
+        }
 
+        public void ShowErrorMessage(long chatId)
+        {
+            var menu = new Menu
+            {
+                Text = $"Сталася непердбачувана помилка",
+            };
+            _menuManager.ShowMenu(chatId, menu);
+        }
     }
 }

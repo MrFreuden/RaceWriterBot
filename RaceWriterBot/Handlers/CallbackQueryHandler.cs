@@ -76,26 +76,25 @@ namespace RaceWriterBot.Handlers
         {
             var userId = query.From.Id;
             var chatId = query.Message.Chat.Id;
-            var messageId = query.Message.MessageId;
 
             switch (pageType)
             {
                 case Constants.CommandNames.CHANNELS_PAGE:
                     _menuManager.HandlePaginationAction<TargetChatSession>(
-                        userId, chatId, messageId, pageType, action, data,
-                        (session) => _viewManager.ShowHashtags(userId, session, messageId));
+                        userId, chatId, pageType, action, data,
+                        (session) => _viewManager.ShowHashtags(userId, session));
                     break;
 
                 case Constants.CommandNames.HASHTAGS_PAGE:
                     _menuManager.HandlePaginationAction<HashtagSession>(
-                        userId, chatId, messageId, pageType, action, data,
-                        (hashtag) => _viewManager.ShowTemplateMessage(userId, hashtag, messageId));
+                        userId, chatId, pageType, action, data,
+                        (hashtag) => _viewManager.ShowTemplateMessage(userId, hashtag));
                     break;
 
                 case Constants.CommandNames.MESSAGES_PAGE:
                     _menuManager.HandlePaginationAction<PostMessagePair>(
-                        userId, chatId, messageId, pageType, action, data,
-                        (pair) => _viewManager.ShowMessageDetails(userId, pair, messageId));
+                        userId, chatId, pageType, action, data,
+                        (pair) => _viewManager.ShowMessageDetails(userId, pair));
                     break;
             }
         }

@@ -59,7 +59,7 @@ namespace RaceWriterBot.Managers
         }
 
         public async Task HandlePaginationAction<T>(
-            long userId, long chatId, int messageId,
+            long userId, long chatId,
             string pageType, string action, string data,
             Action<T> onItemSelected)
         {
@@ -72,6 +72,7 @@ namespace RaceWriterBot.Managers
                     if (int.TryParse(data, out var pageNumber))
                     {
                         var markup = paging.GetPageMarkup(pageNumber);
+                        var messageId = _userDataStorage.GetUser(userId).LastMessageIdFromBot;
                         await _botMessenger.EditMessageReplyMarkup(chatId, messageId, markup);
                     }
                     break;
@@ -85,12 +86,12 @@ namespace RaceWriterBot.Managers
                     break;
 
                 case "back":
-                    await NavigateBack(userId, messageId);
+                    await NavigateBack(userId);
                     break;
             }
         }
 
-        public async Task<Message> NavigateBack(long userId, int? messageId = null)
+        public async Task<Message> NavigateBack(long userId)
         {
             var history = _userDataStorage.GetUser(userId).GetMenuHistory();
 

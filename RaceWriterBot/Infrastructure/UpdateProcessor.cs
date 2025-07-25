@@ -27,17 +27,18 @@ namespace RaceWriterBot.Infrastructure
 
         public Task ProcessMessage(Message message)
         {
+            var userId = message.From.Id;
             if (IsPrivateMessage(message))
             {
-                if (_dialogProcessor.HasActiveDialog(message.From.Id))
+                if (_dialogProcessor.HasActiveDialog(userId))
                 {
-                    if (_dialogProcessor.ProcessDialogMessage(message.From.Id, message))
+                    if (_dialogProcessor.ProcessDialogMessage(userId, message))
                     {
-                        //_viewManager.ReturnToPreviousMenu();
+                        _viewManager.ReturnToPreviousMenu(userId);
                     }
                     else
                     {
-                        //_viewManager.ShowErrorMessage();
+                        _viewManager.ShowErrorMessage(userId);
                     }
                     return Task.CompletedTask;
                 }
