@@ -8,6 +8,7 @@ namespace RaceWriterBot.Models
     {
         private UserSession _userSession;
         private Stack<Menu> _menuHistory;
+        private Menu _currentMenu;
         private IDialogState _dialogState;
         private Dictionary<string, object> _userPaginations;
         private int _lastMessageIdFromBot;
@@ -29,19 +30,32 @@ namespace RaceWriterBot.Models
             _userPaginations = new Dictionary<string, object>();
         }
 
+        public void SetCurrentMenu(Menu menu)
+        {
+            if (_currentMenu == default)
+            {
+                _currentMenu = menu;
+            }
+            else
+            {
+                _menuHistory.Push(_currentMenu);
+                _currentMenu = menu;
+            }
+        }
+
+        public Menu GetLastMenu()
+        {
+            if (_menuHistory.Count != 0)
+            {
+                _currentMenu = default;
+                return _menuHistory.Pop();
+            }
+            throw new InvalidOperationException();
+        }
+
         public UserSession GetUserSession()
         {
             return _userSession;
-        }
-
-        public void AddMenuHistory(Menu menu)
-        {
-            _menuHistory.Push(menu);
-        }
-
-        public Stack<Menu> GetMenuHistory()
-        {
-            return _menuHistory;
         }
 
         public void AddUserDialog(IDialogState dialogState)

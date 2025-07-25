@@ -37,7 +37,7 @@ namespace RaceWriterBot.Managers
 
         public async Task<Message> ShowMenu(long userId, Menu menu)
         {
-            _userDataStorage.GetUser(userId).AddMenuHistory(menu);
+            _userDataStorage.GetUser(userId).SetCurrentMenu(menu);
 
             var markup = menu.GetMarkup();
 
@@ -93,16 +93,9 @@ namespace RaceWriterBot.Managers
 
         public async Task<Message> NavigateBack(long userId)
         {
-            var history = _userDataStorage.GetUser(userId).GetMenuHistory();
+            var lastMenu = _userDataStorage.GetUser(userId).GetLastMenu();
 
-            if (history.Count == 0)
-            {
-                throw new NotImplementedException();
-            }
-            var menu = history.Pop();
-            var markup = menu.GetMarkup();
-
-            return await SendAndRemember(userId, menu.Text, markup);
+            return await ShowMenu(userId, lastMenu);
         }
 
         public void ClearHistory()

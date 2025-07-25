@@ -36,7 +36,12 @@ namespace RaceWriterBot.Infrastructure
             {
                 return user;
             }
-            
+
+            else
+            {
+                AddUser(userId);
+                return _users[userId];
+            }
             throw new KeyNotFoundException($"User with ID {userId} is not found");
         }
 
