@@ -90,5 +90,7 @@ namespace RaceWriterBot.Managers
             };
             _menuManager.ShowMenu(chatId, menu);
         }
+
+
     }
 }

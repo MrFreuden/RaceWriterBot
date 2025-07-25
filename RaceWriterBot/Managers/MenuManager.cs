@@ -2,6 +2,7 @@
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Managers
 {
@@ -16,16 +17,31 @@ namespace RaceWriterBot.Managers
             _userDataStorage = userDataStorage;
         }
 
-        public async Task<Message> ShowMenu(long userId, Menu menu, int? messageId = null)
+        private async Task<Message> SendAndRemember(long userId, string text, InlineKeyboardMarkup markup)
+        {
+            var user = _userDataStorage.GetUser(userId);
+            var messageId = user.LastMessageIdFromBot;
+            Message message;
+            if (messageId == 0)
+            {
+                message = await _botMessenger.SendMessage(userId, text, markup);
+                user.LastMessageIdFromBot = message.Id;
+            }
+            else
+            {
+                message = await _botMessenger.EditMessageText(userId, messageId, text, markup);
+            }
+            
+            return message;
+        }
+
+        public async Task<Message> ShowMenu(long userId, Menu menu)
         {
             _userDataStorage.GetUser(userId).AddMenuHistory(menu);
 
             var markup = menu.GetMarkup();
 
-            if (messageId.HasValue)
-                return await _botMessenger.EditMessageText(userId, messageId.Value, menu.Text, markup);
-            else
-                return await _botMessenger.SendMessage(userId, menu.Text, markup);
+            return await SendAndRemember(userId, menu.Text, markup);
         }
 
         public async Task<Message> ShowPagingMenu<T>(
@@ -39,10 +55,7 @@ namespace RaceWriterBot.Managers
 
             var markup = paging.GetPageMarkup(0);
 
-            if (messageId.HasValue)
-                return await _botMessenger.EditMessageText(userId, messageId.Value, title, markup);
-            else
-                return await _botMessenger.SendMessage(userId, title, markup);
+            return await SendAndRemember(userId, title, markup);
         }
 
         public async Task HandlePaginationAction<T>(
@@ -88,11 +101,7 @@ namespace RaceWriterBot.Managers
             var menu = history.Pop();
             var markup = menu.GetMarkup();
 
-            if (messageId.HasValue)
-            {
-                return await _botMessenger.EditMessageText(userId, messageId.Value, menu.Text, markup);
-            }
-            return await _botMessenger.SendMessage(userId, menu.Text, markup);
+            return await SendAndRemember(userId, menu.Text, markup);
         }
 
         public void ClearHistory()

@@ -33,11 +33,11 @@ namespace RaceWriterBot.Infrastructure
                 {
                     if (_dialogProcessor.ProcessDialogMessage(message.From.Id, message))
                     {
-                        _viewManager.ReturnToPreviousMenu();
+                        //_viewManager.ReturnToPreviousMenu();
                     }
                     else
                     {
-                        _viewManager.ShowErrorMessage();
+                        //_viewManager.ShowErrorMessage();
                     }
                     return Task.CompletedTask;
                 }
