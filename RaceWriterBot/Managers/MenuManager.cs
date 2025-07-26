@@ -1,6 +1,8 @@
-﻿using RaceWriterBot.Infrastructure;
+﻿using RaceWriterBot.Enums;
+using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
+using System.Net.NetworkInformation;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -10,6 +12,7 @@ namespace RaceWriterBot.Managers
     {
         private readonly IBotMessenger _botMessenger;
         private readonly IUserDataStorage _userDataStorage;
+        private const int _countObjectsPerPage = 3;
 
         public MenuManager(IBotMessenger botMessenger, IUserDataStorage userDataStorage)
         {
@@ -37,33 +40,51 @@ namespace RaceWriterBot.Managers
 
         public async Task<Message> ShowMenu(long userId, Menu menu)
         {
-            _userDataStorage.GetUser(userId).SetCurrentMenu(menu);
+            if (!menu.IsInputAwaiting)
+            {
+                _userDataStorage.GetUser(userId).SetCurrentMenu(menu);
+            }
+            if (menu.ButtonsData.Count > _countObjectsPerPage)
+            {
+                return await ShowPagingMenu(userId, menu);
+            }
+            else
+            {
+                var markup = menu.GetMarkup();
 
-            var markup = menu.GetMarkup();
-
-            return await SendAndRemember(userId, menu.Text, markup);
+                return await SendAndRemember(userId, menu.Text, markup);
+            }
         }
 
-        public async Task<Message> ShowPagingMenu<T>(
-            long userId, string title,
-            List<T> values, Func<T, string> itemTextSelector,
-            string pageType, int pageSize = 3, int? messageId = null)
+        private async Task<Message> ShowPagingMenu(long userId, Menu menu)
         {
-            var paging = new Paging<T>(values, itemTextSelector, $"{pageType}_", pageSize);
+            var buttonItems = menu.ButtonsData
+                .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value))
+                .ToList();
+            var pageType = menu.PageType.Value.ToString();
+
+            var paging = new Paging<KeyValuePair<string, string>>(
+                buttonItems, 
+                item => item.Key,
+                $"{pageType}_", 
+                _countObjectsPerPage);
 
             _userDataStorage.GetUser(userId).SavePagination(pageType, paging);
 
             var markup = paging.GetPageMarkup(0);
 
-            return await SendAndRemember(userId, title, markup);
+            return await SendAndRemember(userId, menu.Text, markup);
         }
 
         public async Task HandlePaginationAction<T>(
-            long userId, long chatId,
-            string pageType, string action, string data,
+            long userId, 
+            long chatId,
+            PageType pageType, 
+            string action, 
+            string data,
             Action<T> onItemSelected)
         {
-            var paging = _userDataStorage.GetUser(userId).GetPagination<T>(pageType);
+            var paging = _userDataStorage.GetUser(userId).GetPagination<KeyValuePair<string, string>>(pageType.ToString());
             if (paging == null) return;
 
             switch (action)

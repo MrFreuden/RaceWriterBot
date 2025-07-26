@@ -20,9 +20,6 @@
             public const string Next = Emoji.RightArrow;
             public const string Prev = Emoji.LeftArrow;
             public const string ACTION_BACK = "back";
-            public const string CHANNELS_PAGE = "channels";
-            public const string HASHTAGS_PAGE = "hashtags";
-            public const string MESSAGES_PAGE = "messages";
             public const string ACTION_EDIT_HASHTAG_TEMPLATE = "edit_hashtag_template";
             public const string ACTION_ADD_HASHTAG = "add_hashtag";
             public const string ACTION_EDIT_HASHTAG = "edit_hashtag";

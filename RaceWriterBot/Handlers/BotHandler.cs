@@ -42,12 +42,12 @@ namespace RaceWriterBot.Handlers
 
     public class BotHandler : ICustomUpdateHandler
     {
-        private UpdateProcessor _updateProcessor;
+        private MessageHandler _updateProcessor;
         private CallbackQueryHandler _callbackQueryHandler;
 
         public BotHandler(IBotMessenger botMessenger, IBotDataStorage botDataStorage, IUserDataStorage userDataStorage, IViewManager viewManager, MenuManager menuManager, IDialogProcessor dialogProcessor)
         {
-            _updateProcessor = new UpdateProcessor(botMessenger, userDataStorage, botDataStorage, viewManager);
+            _updateProcessor = new MessageHandler(botMessenger, userDataStorage, botDataStorage, viewManager);
             _callbackQueryHandler = new CallbackQueryHandler(userDataStorage, botDataStorage, botMessenger, dialogProcessor, viewManager, menuManager);
         }
 

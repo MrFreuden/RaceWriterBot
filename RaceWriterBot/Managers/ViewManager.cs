@@ -1,5 +1,6 @@
 ﻿using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
+using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Managers
 {
@@ -7,7 +8,6 @@ namespace RaceWriterBot.Managers
     {
         private readonly IUserDataStorage _userDataStorage;
         private readonly MenuManager _menuManager;
-        private const int _countObjectsPerPage = 3;
 
         public ViewManager(MenuManager menuManager, IUserDataStorage userDataStorage)
         {
@@ -31,7 +31,17 @@ namespace RaceWriterBot.Managers
                 }
                 else
                 {
-                    await _menuManager.ShowPagingMenu(chatId, "Активні канали", targetChatSessions.ToList(), session => session.Name, Constants.CommandNames.CHANNELS_PAGE, _countObjectsPerPage);
+                    var menu = new Menu
+                    {
+                        Text = "Активні канали",
+                        PageType = Enums.PageType.Channels,
+                    };
+
+                    foreach (var session in targetChatSessions)
+                    {
+                        menu.ButtonsData[session.Name] = $"{Enums.PageType.Channels}_item_{session.GetHashCode()}";
+                    }
+                    await _menuManager.ShowMenu(chatId, menu);
                 }
             }
         }
@@ -65,14 +75,20 @@ namespace RaceWriterBot.Managers
                 await _menuManager.ShowMenu(userId, menu);
                 return;
             }
+            else
+            {
+                var menu = new Menu
+                {
+                    Text = $"Хештеги для каналу {channel.Name}:",
+                    PageType = Enums.PageType.Channels,
+                };
 
-            await _menuManager.ShowPagingMenu(
-                userId,
-                $"Хештеги для каналу {channel.Name}:",
-                hashtags.ToList(),
-                hashtag => hashtag.HashtagName,
-                Constants.CommandNames.HASHTAGS_PAGE,
-                _countObjectsPerPage);
+                foreach (var hashtag in hashtags)
+                {
+                    menu.ButtonsData[hashtag.HashtagName] = $"{Enums.PageType.Hashtags}_item_{hashtag.GetHashCode()}";
+                }
+                await _menuManager.ShowMenu(userId, menu);
+            }
         }
 
         public async Task AddBotToTargetChatSettings(long chatId)

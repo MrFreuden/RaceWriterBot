@@ -1,4 +1,5 @@
-﻿using RaceWriterBot.Infrastructure;
+﻿using RaceWriterBot.Enums;
+using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
 using RaceWriterBot.Models;
@@ -46,7 +47,7 @@ namespace RaceWriterBot.Handlers
             var segments = query.Data.Split('_', 3);
             if (segments.Length >= 2)
             {
-                var pageType = segments[0];
+                var pageType = (PageType)Enum.Parse(typeof(PageType), segments[0]);
                 var action = segments[1];
                 HandlePagination(query, pageType, action, segments.Length > 2 ? segments[2] : null);
                 return Task.CompletedTask;
@@ -72,26 +73,26 @@ namespace RaceWriterBot.Handlers
             return Task.CompletedTask;
         }
 
-        private async Task HandlePagination(CallbackQuery query, string pageType, string action, string data)
+        private async Task HandlePagination(CallbackQuery query, PageType pageType, string action, string data)
         {
             var userId = query.From.Id;
             var chatId = query.Message.Chat.Id;
 
             switch (pageType)
             {
-                case Constants.CommandNames.CHANNELS_PAGE:
+                case PageType.Channels:
                     await _menuManager.HandlePaginationAction<TargetChatSession>(
                         userId, chatId, pageType, action, data,
                         (session) => _viewManager.ShowHashtags(userId, session));
                     break;
 
-                case Constants.CommandNames.HASHTAGS_PAGE:
+                case PageType.Hashtags:
                     await _menuManager.HandlePaginationAction<HashtagSession>(
                         userId, chatId, pageType, action, data,
                         (hashtag) => _viewManager.ShowTemplateMessage(userId, hashtag));
                     break;
 
-                case Constants.CommandNames.MESSAGES_PAGE:
+                case PageType.Messages:
                     await _menuManager.HandlePaginationAction<PostMessagePair>(
                         userId, chatId, pageType, action, data,
                         (pair) => _viewManager.ShowMessageDetails(userId, pair));

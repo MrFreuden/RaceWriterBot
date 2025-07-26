@@ -1,11 +1,12 @@
-﻿using RaceWriterBot.Interfaces;
+﻿using RaceWriterBot.Infrastructure;
+using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
 using RaceWriterBot.Models;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Infrastructure
+namespace RaceWriterBot.Handlers
 {
-    public class UpdateProcessor
+    public class MessageHandler
     {
         private readonly IUserDataStorage _userDataStorage;
         private readonly IBotDataStorage _botStorage;
@@ -13,7 +14,7 @@ namespace RaceWriterBot.Infrastructure
         private readonly IDialogProcessor _dialogProcessor;
         private readonly IViewManager _viewManager;
 
-        public UpdateProcessor(
+        public MessageHandler(
             IBotMessenger botMessenger,
             IUserDataStorage userDataStorage,
             IBotDataStorage botDataStorage, IViewManager viewManager)

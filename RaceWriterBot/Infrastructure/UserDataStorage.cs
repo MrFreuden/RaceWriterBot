@@ -10,16 +10,18 @@ namespace RaceWriterBot.Infrastructure
         public UserDataStorage()
         {
             _users = new Dictionary<long, User>();
-            //var defaultUser = new User(190866300);
-            //defaultUser.AddTargetChatSession(-1002633936370, "Test2");
-            ////defaultUser.AddTargetChatSession(new TargetChatSession("Test2", 124));
-            ////defaultUser.AddTargetChatSession(new TargetChatSession("Test3", 125));
-            ////defaultUser.AddTargetChatSession(new TargetChatSession("Test4", 126));
-            ////defaultUser.AddTargetChatSession(new TargetChatSession("Test5", 127));
-            ////defaultUser.AddTargetChatSession(new TargetChatSession("Test6", 128));
-            ////defaultUser.AddTargetChatSession(new TargetChatSession("Test7", 129));
+            var defaultUser = new User(190866300);
+            defaultUser.AddTargetChatSession(-1002633936370, "Test2");
+            defaultUser.AddTargetChatSession(-1002633936371, "Test3");
+            defaultUser.AddTargetChatSession(-1002633936372, "Test4");
+            defaultUser.AddTargetChatSession(-1002633936373, "Test5");
+            defaultUser.AddTargetChatSession(-1002633936374, "Test6");
+            defaultUser.AddTargetChatSession(-1002633936375, "Test7");
+            defaultUser.AddTargetChatSession(-1002633936376, "Test8");
+            defaultUser.AddTargetChatSession(-1002633936377, "Test9");
+            defaultUser.AddTargetChatSession(-1002633936378, "Test10");
 
-            //_users.Add(190866300, defaultUser);
+            _users.Add(190866300, defaultUser);
         }
 
         public void AddUser(long userId)
