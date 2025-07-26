@@ -1,8 +1,5 @@
 ﻿using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
-using System.Threading.Channels;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Managers
 {
@@ -10,7 +7,7 @@ namespace RaceWriterBot.Managers
     {
         private readonly IUserDataStorage _userDataStorage;
         private readonly MenuManager _menuManager;
-        private const int CountObjectsPerPage = 3;
+        private const int _countObjectsPerPage = 3;
 
         public ViewManager(MenuManager menuManager, IUserDataStorage userDataStorage)
         {
@@ -18,7 +15,7 @@ namespace RaceWriterBot.Managers
             _menuManager = menuManager;
         }
 
-        public void Settings(long chatId)
+        public async Task Settings(long chatId)
         {
             var targetChatSessions = _userDataStorage.GetUser(chatId).GetTargetChatSessions();
             if (targetChatSessions != null)
@@ -30,31 +27,31 @@ namespace RaceWriterBot.Managers
                         Text = "У вас немає активних каналів",
                         ButtonsData = { ["Створити"] = Constants.CommandNames.ACTION_CREATE_TARGET_CHAT }
                     };
-                    _menuManager.ShowMenu(chatId, menu);
+                    await _menuManager.ShowMenu(chatId, menu);
                 }
                 else
                 {
-                    _menuManager.ShowPagingMenu(chatId, "Активні канали", targetChatSessions.ToList(), session => session.Name, Constants.CommandNames.CHANNELS_PAGE, CountObjectsPerPage);
+                    await _menuManager.ShowPagingMenu(chatId, "Активні канали", targetChatSessions.ToList(), session => session.Name, Constants.CommandNames.CHANNELS_PAGE, _countObjectsPerPage);
                 }
             }
         }
 
-        public void ShowMessageDetails(long userId, PostMessagePair pair)
+        public async Task ShowMessageDetails(long userId, PostMessagePair pair)
         {
             throw new NotImplementedException();
         }
 
-        public void ShowTemplateMessage(long userId, HashtagSession hashtag)
+        public async Task ShowTemplateMessage(long userId, HashtagSession hashtag)
         {
             var menu = new Menu
             {
                 Text = hashtag.TextTemplate,
                 ButtonsData = { ["Редагувати"] = $"{Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE}_{hashtag.HashtagName}" },
             };
-            _menuManager.ShowMenu(userId, menu);
+            await _menuManager.ShowMenu(userId, menu);
         }
 
-        public void ShowHashtags(long userId, TargetChatSession channel)
+        public async Task ShowHashtags(long userId, TargetChatSession channel)
         {
             var hashtags = _userDataStorage.GetUser(userId).GetHashtagSessions(channel.TargetChatId);
 
@@ -65,44 +62,84 @@ namespace RaceWriterBot.Managers
                     Text = $"Канал {channel.Name} не має хештегів",
                     ButtonsData = { ["Створити"] = $"{Constants.CommandNames.ACTION_ADD_HASHTAG}_{channel.GetHashCode()}" }
                 };
-                _menuManager.ShowMenu(userId, menu);
+                await _menuManager.ShowMenu(userId, menu);
                 return;
             }
 
-            _menuManager.ShowPagingMenu(userId, $"Хештеги для каналу {channel.Name}:", hashtags.ToList(), hashtag => hashtag.HashtagName, Constants.CommandNames.HASHTAGS_PAGE, CountObjectsPerPage);
+            await _menuManager.ShowPagingMenu(
+                userId,
+                $"Хештеги для каналу {channel.Name}:",
+                hashtags.ToList(),
+                hashtag => hashtag.HashtagName,
+                Constants.CommandNames.HASHTAGS_PAGE,
+                _countObjectsPerPage);
         }
 
-        public void AddBotToTargetChatSettings(long chatId)
+        public async Task AddBotToTargetChatSettings(long chatId)
         {
             var menu = new Menu
             {
                 Text = $"Додайте бота в чат обговорень каналу та дайте йому права адміністратора",
                 ButtonsData = { ["Зроблено"] = Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT }
             };
-            _menuManager.ShowMenu(chatId, menu);
+            await _menuManager.ShowMenu(chatId, menu);
         }
 
-        public void RequestForwardedMessage(long chatId)
+        public async Task RequestForwardedMessage(long chatId)
         {
             var menu = new Menu
             {
                 Text = $"Надішліть будь-яке повідомлення з чату обговорень",
             };
-            _menuManager.ShowMenu(chatId, menu);
+            await _menuManager.ShowMenu(chatId, menu);
         }
 
-        public void ReturnToPreviousMenu(long chatId)
+        public async Task ReturnToPreviousMenu(long chatId)
         {
-            _menuManager.NavigateBack(chatId);
+            await _menuManager.NavigateBack(chatId);
         }
 
-        public void ShowErrorMessage(long chatId)
+        public async Task ShowErrorMessage(long chatId)
         {
             var menu = new Menu
             {
                 Text = $"Сталася непердбачувана помилка",
             };
-            _menuManager.ShowMenu(chatId, menu);
+            await _menuManager.ShowMenu(chatId, menu);
+        }
+
+        public async Task AddNewHashtag(long userId, int channelHash)
+        {
+            var user = _userDataStorage.GetUser(userId);
+            var channelSession = user.GetTargetChatSessions(channelHash);
+
+            if (channelSession != null)
+            {
+                user.SetExpectedAction(Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
+                var menu = new Menu
+                {
+                    Text = $"Введіть новий хештег",
+                };
+                await _menuManager.ShowMenu(userId, menu);
+            }
+        }
+
+        public async Task StartEditHashtagTemplate(long userId, string hashtagName)
+        {
+            var user = _userDataStorage.GetUser(userId);
+            var hashtag = user.GetHashtagSession(hashtagName);
+            var menu = new Menu();
+            if (hashtag == null)
+            {
+                menu.Text = $"Хештег не знайдено або у вас немає прав для його редагування.";
+                await _menuManager.ShowMenu(userId, menu);
+                return;
+            }
+
+            user.SetExpectedAction(Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
+
+            menu.Text = $"Будь ласка, введіть новий текст шаблону для хештега #{hashtagName}";
+            await _menuManager.ShowMenu(userId, menu);
         }
     }
 }

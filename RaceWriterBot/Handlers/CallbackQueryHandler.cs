@@ -30,7 +30,7 @@ namespace RaceWriterBot.Handlers
             if (query.Data.StartsWith(Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE))
             {
                 var hashtagName = query.Data.Split('_').Last();
-                StartEditHashtagTemplate(query.From.Id, hashtagName, query.Message.MessageId);
+                _viewManager.StartEditHashtagTemplate(query.From.Id, hashtagName);
                 return Task.CompletedTask;
             }
 
@@ -38,7 +38,7 @@ namespace RaceWriterBot.Handlers
             {
                 if (int.TryParse(query.Data.Split("_").Last(), out var channelHash))
                 {
-                    AddNewHashtag(query.From.Id, channelHash, query.Message.MessageId);
+                    _viewManager.AddNewHashtag(query.From.Id, channelHash);
                 }
                 return Task.CompletedTask;
             }
@@ -72,7 +72,7 @@ namespace RaceWriterBot.Handlers
             return Task.CompletedTask;
         }
 
-        private void HandlePagination(CallbackQuery query, string pageType, string action, string data)
+        private async Task HandlePagination(CallbackQuery query, string pageType, string action, string data)
         {
             var userId = query.From.Id;
             var chatId = query.Message.Chat.Id;
@@ -80,57 +80,23 @@ namespace RaceWriterBot.Handlers
             switch (pageType)
             {
                 case Constants.CommandNames.CHANNELS_PAGE:
-                    _menuManager.HandlePaginationAction<TargetChatSession>(
+                    await _menuManager.HandlePaginationAction<TargetChatSession>(
                         userId, chatId, pageType, action, data,
                         (session) => _viewManager.ShowHashtags(userId, session));
                     break;
 
                 case Constants.CommandNames.HASHTAGS_PAGE:
-                    _menuManager.HandlePaginationAction<HashtagSession>(
+                    await _menuManager.HandlePaginationAction<HashtagSession>(
                         userId, chatId, pageType, action, data,
                         (hashtag) => _viewManager.ShowTemplateMessage(userId, hashtag));
                     break;
 
                 case Constants.CommandNames.MESSAGES_PAGE:
-                    _menuManager.HandlePaginationAction<PostMessagePair>(
+                    await _menuManager.HandlePaginationAction<PostMessagePair>(
                         userId, chatId, pageType, action, data,
                         (pair) => _viewManager.ShowMessageDetails(userId, pair));
                     break;
             }
-        }
-
-        private void AddNewHashtag(long userId, int channelHash, int messageId)
-        {
-            var user = _userDataStorage.GetUser(userId);
-            var channelSession = user.GetTargetChatSessions(channelHash);
-
-            if (channelSession != null)
-            {
-                user.SetExpectedAction(Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
-
-                _botMessenger.SendMessage(
-                    userId,
-                    "Введіть новий хештег");
-            }
-        }
-
-        private void StartEditHashtagTemplate(long userId, string hashtagName, int messageId)
-        {
-            var user = _userDataStorage.GetUser(userId);
-            var hashtag = user.GetHashtagSession(hashtagName);
-            if (hashtag == null)
-            {
-                _botMessenger.SendMessage(
-                    userId,
-                    "Хештег не знайдено або у вас немає прав для його редагування.");
-                return;
-            }
-
-            user.SetExpectedAction(Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
-
-            _botMessenger.SendMessage(
-                userId,
-                "Будь ласка, введіть новий текст шаблону для хештега #" + hashtagName);
-        }
+        } 
     }
 }

@@ -4,13 +4,15 @@ namespace RaceWriterBot.Interfaces
 {
     public interface IViewManager
     {
-        void Settings(long chatId);
-        void ShowHashtags(long userId, TargetChatSession channel);
-        void ShowMessageDetails(long userId, PostMessagePair pair);
-        void ShowTemplateMessage(long userId, HashtagSession hashtag);
-        void AddBotToTargetChatSettings(long chatId);
-        void RequestForwardedMessage(long chatId);
-        void ReturnToPreviousMenu(long chatId);
-        void ShowErrorMessage(long chatId);
+        Task Settings(long chatId);
+        Task ShowHashtags(long userId, TargetChatSession channel);
+        Task ShowMessageDetails(long userId, PostMessagePair pair);
+        Task ShowTemplateMessage(long userId, HashtagSession hashtag);
+        Task AddBotToTargetChatSettings(long chatId);
+        Task RequestForwardedMessage(long chatId);
+        Task ReturnToPreviousMenu(long chatId);
+        Task ShowErrorMessage(long chatId);
+        Task AddNewHashtag(long userId, int channelHash);
+        Task StartEditHashtagTemplate(long userId, string hashtagName);
     }
 }
