@@ -3,6 +3,8 @@ using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
 using RaceWriterBot.Models;
+using System;
+using System.Net.Sockets;
 using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Handlers
@@ -26,78 +28,166 @@ namespace RaceWriterBot.Handlers
             _menuManager = menuManager;
         }
 
-        public Task ProcessCallbackQuery(CallbackQuery query)
+        public async Task ProcessCallbackQuery(CallbackQuery query)
         {
-            if (query.Data.StartsWith(Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE))
+            if (!string.IsNullOrEmpty(query.Data))
             {
-                var hashtagName = query.Data.Split('_').Last();
-                _viewManager.StartEditHashtagTemplate(query.From.Id, hashtagName);
-                return Task.CompletedTask;
-            }
-
-            if (query.Data.StartsWith(Constants.CommandNames.ACTION_ADD_HASHTAG))
-            {
-                if (int.TryParse(query.Data.Split("_").Last(), out var channelHash))
+                var parts = query.Data.Split('_');
+                var type = ParseCallbackType(parts);
+                if (parts.Length <= 1)
                 {
-                    _viewManager.AddNewHashtag(query.From.Id, channelHash);
+                    throw new ArgumentException();
                 }
-                return Task.CompletedTask;
+                parts = parts.Skip(1).ToArray();
+                switch (type)
+                {
+                    case CallbackType.Command:
+                        var cb = ParseCallbackDataAsCommand(parts, query.From.Id);
+                        await RouteToHandler(cb);
+                        break;
+
+                    case CallbackType.Paging:
+                        var cb1 = ParseCallbackDataAsPaging(parts, query.From.Id);
+                        await HandlePagination(cb1);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private CallbackType ParseCallbackType(string[] parts)
+        {
+            if (Enum.TryParse(parts.First(), out CallbackType type))
+            {
+                return type;
+            }
+            throw new ArgumentException();
+        }
+
+        private ParsedCallback ParseCallbackDataAsCommand(string[] query, long userId)
+        {
+            var parameter = query.Length > 1 ? query[1] : null;
+
+            if (Enum.TryParse(query.First(), out CallbackAction action))
+            {
+                return new ParsedCallback { Action = action, Parameter = parameter, UserId = userId };
             }
 
-            var segments = query.Data.Split('_', 3);
-            if (segments.Length >= 2)
+            throw new ArgumentException();
+        }
+
+        private ParsedCallback ParseCallbackDataAsPaging(string[] query, long userId)
+        {
+            if (query.Length != 3)
             {
-                var pageType = (PageType)Enum.Parse(typeof(PageType), segments[0]);
-                var action = segments[1];
-                HandlePagination(query, pageType, action, segments.Length > 2 ? segments[2] : null);
-                return Task.CompletedTask;
+                throw new ArgumentException();
             }
-            switch (query.Data)
+            if (Enum.TryParse(query[0], out PageType pageType) && Enum.TryParse(query[1], out PaginationAction action))
             {
-                case Constants.CommandNames.ACTION_CREATE_TARGET_CHAT:
-                    _viewManager.AddBotToTargetChatSettings(query.From.Id);
+                var parameter = query[2];
+                return new ParsedCallback { PageType = pageType, PaginationAction = action, Parameter = parameter, UserId = userId };
+            }
+            throw new ArgumentException();
+        }
+
+        private async Task RouteToHandler(ParsedCallback callback)
+        {
+            switch (callback.Action)
+            {
+                case CallbackAction.Back:
+                    await _menuManager.NavigateBack(callback.UserId);
                     break;
-                case Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT:
-                    _viewManager.RequestForwardedMessage(query.From.Id);
+                case CallbackAction.EditHashtagTemplate:
+                    await _viewManager.StartEditHashtagTemplate(callback.UserId, callback.Parameter);
                     break;
-                case Constants.CommandNames.ACTION_BACK:
-                    _menuManager.NavigateBack(query.From.Id);
+                case CallbackAction.AddHashtag:
+                    if (long.TryParse(callback.Parameter, out var channelId))
+                    {
+                        await _viewManager.AddNewHashtag(callback.UserId, channelId);
+                    }
                     break;
-                case "4":
+                case CallbackAction.CreateTargetChat:
+                    await _viewManager.AddBotToTargetChatSettings(callback.UserId);
                     break;
-                case "":
+                case CallbackAction.AddBot:
+                    await _viewManager.RequestForwardedMessage(callback.UserId);
                     break;
+                case CallbackAction.EditHashtagName:
+                    // Обработка изменения имени хэштега
+                    // Требуется реализация метода в _viewManager
+                    break;
+                case CallbackAction.Unknown:
+                default:
+                    // Обработка неизвестного действия
+                    throw new NotImplementedException();
+                    break;
+            }
+        }
+
+        private async Task HandlePagination(ParsedCallback callback)
+        {
+            var user = _userDataStorage.GetUser(callback.UserId);
+            switch (callback.PaginationAction)
+            {
+                case PaginationAction.Item:
+                    switch (callback.PageType)
+                    {
+                        case PageType.Channels:
+                            await _menuManager.HandleActionItem<TargetChatSession>(
+                                callback.UserId, user.GetTargetChatSession(long.Parse(callback.Parameter)),
+                                (session) => _viewManager.ShowHashtags(callback.UserId, session));
+                            break;
+
+                        case PageType.Hashtags:
+                            await _menuManager.HandleActionItem<HashtagSession>(
+                                callback.UserId, user.GetHashtagSession(callback.Parameter),
+                                (hashtag) => _viewManager.ShowTemplateMessage(callback.UserId, hashtag));
+                            break;
+
+                        case PageType.Messages:
+                            await _menuManager.HandleActionItem<PostMessagePair>(
+                                callback.UserId, new PostMessagePair(),
+                                (pair) => _viewManager.ShowMessageDetails(callback.UserId, pair));
+                            break;
+                    }
+                    break;
+
+                case PaginationAction.Page:
+                    var pageNumber = int.Parse(callback.Parameter);
+                    await _menuManager.HandleActionPage(callback.UserId, pageNumber);
+                    break;
+
                 default:
                     break;
             }
-            return Task.CompletedTask;
         }
+    }
 
-        private async Task HandlePagination(CallbackQuery query, PageType pageType, string action, string data)
-        {
-            var userId = query.From.Id;
-            var chatId = query.Message.Chat.Id;
+    public enum CallbackType
+    {
+        Command,
+        Paging
+    }
 
-            switch (pageType)
-            {
-                case PageType.Channels:
-                    await _menuManager.HandlePaginationAction<TargetChatSession>(
-                        userId, chatId, pageType, action, data,
-                        (session) => _viewManager.ShowHashtags(userId, session));
-                    break;
+    public enum CallbackAction
+    {
+        Unknown,
+        Back,
+        EditHashtagTemplate,
+        AddHashtag,
+        EditHashtagName,
+        CreateTargetChat,
+        AddBot
+    }
 
-                case PageType.Hashtags:
-                    await _menuManager.HandlePaginationAction<HashtagSession>(
-                        userId, chatId, pageType, action, data,
-                        (hashtag) => _viewManager.ShowTemplateMessage(userId, hashtag));
-                    break;
-
-                case PageType.Messages:
-                    await _menuManager.HandlePaginationAction<PostMessagePair>(
-                        userId, chatId, pageType, action, data,
-                        (pair) => _viewManager.ShowMessageDetails(userId, pair));
-                    break;
-            }
-        } 
+    public class ParsedCallback
+    {
+        public long UserId { get; set; }
+        public CallbackAction? Action { get; set; }
+        public PaginationAction? PaginationAction { get; set; }
+        public PageType? PageType { get; set; }
+        public string? Parameter { get; set; }
     }
 }

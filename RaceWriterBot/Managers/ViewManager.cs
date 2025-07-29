@@ -1,5 +1,8 @@
-﻿using RaceWriterBot.Interfaces;
+﻿using RaceWriterBot.Enums;
+using RaceWriterBot.Handlers;
+using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
+using System.Threading.Channels;
 using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Managers
@@ -25,7 +28,7 @@ namespace RaceWriterBot.Managers
                     var menu = new Menu
                     {
                         Text = "У вас немає активних каналів",
-                        ButtonsData = { ["Створити"] = Constants.CommandNames.ACTION_CREATE_TARGET_CHAT }
+                        ButtonsData = { ["Створити"] = $"{CallbackType.Command}_{CallbackAction.CreateTargetChat}"}
                     };
                     await _menuManager.ShowMenu(chatId, menu);
                 }
@@ -39,7 +42,7 @@ namespace RaceWriterBot.Managers
 
                     foreach (var session in targetChatSessions)
                     {
-                        menu.ButtonsData[session.Name] = $"{Enums.PageType.Channels}_item_{session.GetHashCode()}";
+                        menu.ButtonsData[session.Name] = $"{CallbackType.Paging}_{Enums.PageType.Channels}_{PaginationAction.Item}_{session.TargetChatId}";
                     }
                     await _menuManager.ShowMenu(chatId, menu);
                 }
@@ -56,7 +59,7 @@ namespace RaceWriterBot.Managers
             var menu = new Menu
             {
                 Text = hashtag.TextTemplate,
-                ButtonsData = { ["Редагувати"] = $"{Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE}_{hashtag.HashtagName}" },
+                ButtonsData = { ["Редагувати"] = $"{CallbackType.Command}_{CallbackAction.EditHashtagTemplate}_{hashtag.HashtagName}" },
             };
             await _menuManager.ShowMenu(userId, menu);
         }
@@ -70,7 +73,7 @@ namespace RaceWriterBot.Managers
                 var menu = new Menu
                 {
                     Text = $"Канал {channel.Name} не має хештегів",
-                    ButtonsData = { ["Створити"] = $"{Constants.CommandNames.ACTION_ADD_HASHTAG}_{channel.GetHashCode()}" }
+                    ButtonsData = { ["Створити"] = $"{CallbackType.Command}_{CallbackAction.AddHashtag}_{channel.TargetChatId}" }
                 };
                 await _menuManager.ShowMenu(userId, menu);
                 return;
@@ -85,7 +88,7 @@ namespace RaceWriterBot.Managers
 
                 foreach (var hashtag in hashtags)
                 {
-                    menu.ButtonsData[hashtag.HashtagName] = $"{Enums.PageType.Hashtags}_item_{hashtag.GetHashCode()}";
+                    menu.ButtonsData[hashtag.HashtagName] = $"{CallbackType.Paging}_{Enums.PageType.Hashtags}_{PaginationAction.Item}_{hashtag.HashtagName}";
                 }
                 await _menuManager.ShowMenu(userId, menu);
             }
@@ -96,7 +99,7 @@ namespace RaceWriterBot.Managers
             var menu = new Menu
             {
                 Text = $"Додайте бота в чат обговорень каналу та дайте йому права адміністратора",
-                ButtonsData = { ["Зроблено"] = Constants.CommandNames.ACTION_CONFIRMATION_ADDING_BOT }
+                ButtonsData = { ["Зроблено"] = $"{CallbackType.Command}_{CallbackAction.AddBot}" }
             };
             await _menuManager.ShowMenu(chatId, menu);
         }
@@ -124,14 +127,14 @@ namespace RaceWriterBot.Managers
             await _menuManager.ShowMenu(chatId, menu);
         }
 
-        public async Task AddNewHashtag(long userId, int channelHash)
+        public async Task AddNewHashtag(long userId, long channelId)
         {
             var user = _userDataStorage.GetUser(userId);
-            var channelSession = user.GetTargetChatSessions(channelHash);
+            var channelSession = user.GetTargetChatSession(channelId);
 
             if (channelSession != null)
             {
-                user.SetExpectedAction(Constants.CommandNames.ACTION_ADD_HASHTAG, channelSession);
+                user.SetExpectedAction(CallbackAction.AddHashtag.ToString(), channelSession);
                 var menu = new Menu
                 {
                     Text = $"Введіть новий хештег",
@@ -152,7 +155,7 @@ namespace RaceWriterBot.Managers
                 return;
             }
 
-            user.SetExpectedAction(Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE, hashtag);
+            user.SetExpectedAction(CallbackAction.EditHashtagTemplate.ToString(), hashtag);
 
             menu.Text = $"Будь ласка, введіть новий текст шаблону для хештега #{hashtagName}";
             await _menuManager.ShowMenu(userId, menu);

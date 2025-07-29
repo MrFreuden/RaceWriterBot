@@ -12,7 +12,7 @@ namespace RaceWriterBot.Interfaces
         Task RequestForwardedMessage(long chatId);
         Task ReturnToPreviousMenu(long chatId);
         Task ShowErrorMessage(long chatId);
-        Task AddNewHashtag(long userId, int channelHash);
+        Task AddNewHashtag(long userId, long channelId);
         Task StartEditHashtagTemplate(long userId, string hashtagName);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
-using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Models
 {
@@ -10,7 +9,8 @@ namespace RaceWriterBot.Models
         private Stack<Menu> _menuHistory;
         private Menu _currentMenu;
         private IDialogState _dialogState;
-        private Dictionary<string, object> _userPaginations;
+
+        public Paging Paging { get; set; }
         private int _lastMessageIdFromBot;
         public int LastMessageIdFromBot
         {
@@ -27,7 +27,6 @@ namespace RaceWriterBot.Models
         {
             _userSession = new UserSession(userId);
             _menuHistory = new Stack<Menu>();
-            _userPaginations = new Dictionary<string, object>();
         }
 
         public void SetCurrentMenu(Menu menu)
@@ -68,23 +67,13 @@ namespace RaceWriterBot.Models
             return _dialogState;
         }
 
-        public void SavePagination<T>(string paginationType, Paging<T> paging)
+
+        public Paging GetPagination()
         {
-            _userPaginations[paginationType] = paging;
+            return _currentMenu.Paging;
         }
 
-        public Paging<T> GetPagination<T>(string paginationType)
-        {
-            if (_userPaginations.TryGetValue(paginationType, out var paging) &&
-                paging is Paging<T> typedPaging)
-            {
-                return typedPaging;
-            }
-
-            return null;
-        }
-
-        public TargetChatSession GetTargetChatSession(long targetChatId)
+        public TargetChatSession? GetTargetChatSession(long targetChatId)
         {
             return _userSession.TargetChats.FirstOrDefault(c => c.TargetChatId == targetChatId);
         }
@@ -119,7 +108,7 @@ namespace RaceWriterBot.Models
             else
             {
                 throw new ArgumentNullException(nameof(titel));
-            }        
+            }
         }
 
         public void AddHashtagSession(long targetChatId, HashtagSession hashtag)
@@ -176,11 +165,6 @@ namespace RaceWriterBot.Models
             _dialogState = null;
         }
 
-        public TargetChatSession? GetTargetChatSessions(int channelHash)
-        {
-            return _userSession.TargetChats
-                .Where(s => s.GetHashCode() == channelHash)
-                .FirstOrDefault();
-        }
+        
     }
 }

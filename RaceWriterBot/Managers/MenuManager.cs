@@ -1,8 +1,6 @@
-﻿using RaceWriterBot.Enums;
-using RaceWriterBot.Infrastructure;
+﻿using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Models;
-using System.Net.NetworkInformation;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -13,6 +11,7 @@ namespace RaceWriterBot.Managers
         private readonly IBotMessenger _botMessenger;
         private readonly IUserDataStorage _userDataStorage;
         private const int _countObjectsPerPage = 3;
+
 
         public MenuManager(IBotMessenger botMessenger, IUserDataStorage userDataStorage)
         {
@@ -34,7 +33,7 @@ namespace RaceWriterBot.Managers
             {
                 message = await _botMessenger.EditMessageText(userId, messageId, text, markup);
             }
-            
+
             return message;
         }
 
@@ -61,57 +60,37 @@ namespace RaceWriterBot.Managers
             var buttonItems = menu.ButtonsData
                 .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value))
                 .ToList();
-            var pageType = menu.PageType.Value.ToString();
 
-            var paging = new Paging<KeyValuePair<string, string>>(
-                buttonItems, 
-                item => item.Key,
-                $"{pageType}_", 
-                _countObjectsPerPage);
+            var buttons = buttonItems.Select(b => new InlineKeyboardButton(b.Key, b.Value)).ToList();
 
-            _userDataStorage.GetUser(userId).SavePagination(pageType, paging);
+            menu.Paging = new Paging(buttons, menu.PageType.Value, _countObjectsPerPage);
 
-            var markup = paging.GetPageMarkup(0);
+            var markup = menu.Paging.GetPageMarkup(0);
 
             return await SendAndRemember(userId, menu.Text, markup);
         }
 
-        public async Task HandlePaginationAction<T>(
-            long userId, 
-            long chatId,
-            PageType pageType, 
-            string action, 
-            string data,
-            Action<T> onItemSelected)
+        public async Task HandleActionItem<T>(long userId, T item, Action<T> onItemSelected)
         {
-            var paging = _userDataStorage.GetUser(userId).GetPagination<KeyValuePair<string, string>>(pageType.ToString());
-            if (paging == null) return;
-
-            switch (action)
+            if (item != null)
             {
-                case "page":
-                    if (int.TryParse(data, out var pageNumber))
-                    {
-                        var markup = paging.GetPageMarkup(pageNumber);
-                        var messageId = _userDataStorage.GetUser(userId).LastMessageIdFromBot;
-                        await _botMessenger.EditMessageReplyMarkup(chatId, messageId, markup);
-                    }
-                    break;
-
-                case "item":
-                    var selectedItem = paging.GetItem(data);
-                    if (selectedItem != null)
-                    {
-                        onItemSelected(selectedItem);
-                    }
-                    break;
-
-                case "back":
-                    await NavigateBack(userId);
-                    break;
+                onItemSelected(item);
             }
         }
 
+        public async Task HandleActionPage(long userId, int pageNumber)
+        {
+            var paging = _userDataStorage.GetUser(userId).GetPagination();
+            if (paging == null) return;
+
+            var markup = paging.GetPageMarkup(pageNumber);
+
+            var messageId = _userDataStorage.GetUser(userId).LastMessageIdFromBot;
+
+            await _botMessenger.EditMessageReplyMarkup(userId, messageId, markup);
+        }
+
+        
         public async Task<Message> NavigateBack(long userId)
         {
             var lastMenu = _userDataStorage.GetUser(userId).GetLastMenu();

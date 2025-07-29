@@ -1,4 +1,5 @@
 ﻿using RaceWriterBot.Enums;
+using RaceWriterBot.Infrastructure;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Models
@@ -8,9 +9,10 @@ namespace RaceWriterBot.Models
         public string Text;
         public Dictionary<string, string> ButtonsData = [];
         public PageType? PageType;
-        private bool _isInputAwaiting = true;
+        private bool _isInputAwaiting = false;
         public const int MaxPerRow = 3;
         public const int MaxDataRows = 2;
+        public Paging Paging {  get; set; }
         public bool IsInputAwaiting { get => _isInputAwaiting; set => _isInputAwaiting = value; }
 
 

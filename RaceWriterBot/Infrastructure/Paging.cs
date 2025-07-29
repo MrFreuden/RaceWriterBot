@@ -1,23 +1,20 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
+﻿using RaceWriterBot.Enums;
+using RaceWriterBot.Handlers;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Infrastructure
 {
-    public class Paging<T>
+    public class Paging
     {
-        private readonly List<T> _values;
-        private readonly Func<T, string> _itemTextSelector;
-        private readonly string _callbackPrefix;
+        private readonly List<InlineKeyboardButton> _values;
+        //private readonly Func<T, string> _itemTextSelector;
+        private readonly PageType _callbackPrefix;
         public int PageSize { get; }
         public int TotalPages { get; }
 
-        public Paging(
-            List<T> values, 
-            Func<T, string> itemTextSelector, 
-            string callbackPrefix, 
-            int pageSize)
+        public Paging(List<InlineKeyboardButton> values, PageType callbackPrefix, int pageSize)
         {
             _values = values;
-            _itemTextSelector = itemTextSelector;
             _callbackPrefix = callbackPrefix;
             PageSize = pageSize;
             TotalPages = (int)Math.Ceiling((double)values.Count / pageSize);
@@ -29,12 +26,12 @@ namespace RaceWriterBot.Infrastructure
             return keyboard;
         }
 
-        public T GetItem(string data)
+        public InlineKeyboardButton GetItem(string data)
         {
             return _values.FirstOrDefault(i => i.GetHashCode().ToString() == data);
         }
 
-        private List<T> GetPage(int page)
+        private List<InlineKeyboardButton> GetPage(int page)
         {
             return _values.Skip(page * PageSize).Take(PageSize).ToList();
         }
@@ -45,16 +42,16 @@ namespace RaceWriterBot.Infrastructure
             var pageItems = GetPage(page);
 
             var objectButtons = pageItems
-                .Select(item => InlineKeyboardButton.WithCallbackData(_itemTextSelector(item), $"{_callbackPrefix}item_{item.GetHashCode()}"))
+                .Select(item => InlineKeyboardButton.WithCallbackData(item.Text, $"{CallbackType.Paging}_{_callbackPrefix}_{PaginationAction.Item}_{item.GetHashCode()}"))
                 .ToList();
 
-            rows.Add(objectButtons);
+            rows.Add(pageItems);
 
             var navButtons = new List<InlineKeyboardButton>();
             if (page > 0)
-                navButtons.Add(InlineKeyboardButton.WithCallbackData(Constants.CommandNames.Prev, $"{_callbackPrefix}page_{page - 1}"));
+                navButtons.Add(InlineKeyboardButton.WithCallbackData(Constants.CommandNames.Prev, $"{CallbackType.Paging}_{_callbackPrefix}_{PaginationAction.Page}_{page - 1}"));
             if (page < totalPages - 1)
-                navButtons.Add(InlineKeyboardButton.WithCallbackData(Constants.CommandNames.Next, $"{_callbackPrefix}page_{page + 1}"));
+                navButtons.Add(InlineKeyboardButton.WithCallbackData(Constants.CommandNames.Next, $"{CallbackType.Paging}_{_callbackPrefix}_{PaginationAction.Page}_{page + 1}"));
 
             if (navButtons.Count != 0)
                 rows.Add(navButtons);
