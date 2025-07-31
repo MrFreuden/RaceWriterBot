@@ -1,6 +1,6 @@
-﻿using RaceWriterBot.Infrastructure;
+﻿using RaceWriterBot.Domain.Models.Old;
+using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
-using RaceWriterBot.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 

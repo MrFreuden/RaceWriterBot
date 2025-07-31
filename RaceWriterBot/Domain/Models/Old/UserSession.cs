@@ -1,4 +1,4 @@
-﻿namespace RaceWriterBot.Models
+﻿namespace RaceWriterBot.Domain.Models.Old
 {
     public class UserSession
     {

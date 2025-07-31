@@ -20,11 +20,21 @@
         {
             _keyValuePairs.Add(targetChatId, default);
         }
+
+        public long GetUserId(long targetChatId)
+        {
+            if (_keyValuePairs.TryGetValue(targetChatId, out long userId))
+            {
+                return userId;
+            }
+            return default;
+        }
     }
     
     public interface IBotDataStorage
     {
         bool AddOwner(long ownerId, long targetChatId);
         void AddTargetChatId(long targetChatId);
+        long GetUserId(long targetChatId);
     }
 }

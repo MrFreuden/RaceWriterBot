@@ -1,4 +1,6 @@
-﻿namespace RaceWriterBot.Models
+﻿using RaceWriterBot.Domain.Models.Entity;
+
+namespace RaceWriterBot.Domain.Models.Old
 {
     public class HashtagSession
     {

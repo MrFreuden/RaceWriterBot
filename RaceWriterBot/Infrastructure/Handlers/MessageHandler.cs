@@ -1,10 +1,9 @@
 ﻿using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
-using RaceWriterBot.Models;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Handlers
+namespace RaceWriterBot.Infrastructure.Handlers
 {
     public class MessageHandler
     {
@@ -56,10 +55,40 @@ namespace RaceWriterBot.Handlers
                 throw new NotImplementedException();
                 //var parsed = ParseMessage(message);
             }
+            if (message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup && message.ForwardFromChat.Type == Telegram.Bot.Types.Enums.ChatType.Channel)
+            {
+                var channelId = message.ForwardFromChat.Id;
+
+                var hashtags = ParseHashtagFromText(message.Text);
+                var attachedUserId = _botStorage.GetUserId(channelId);
+                if (_userDataStorage.TryGetUser(attachedUserId, out var user))
+                {
+                    var hashtag = user.GetTrackedHashtag(channelId, hashtags);
+                    if (hashtag != null)
+                    {
+                        _viewManager.CommentWithTemplateMessage(user., channelId, hashtag);
+                    }
+                }
+            }
             return Task.CompletedTask;
         }
 
+        private string[] ParseHashtagFromText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return Array.Empty<string>();
+            }
 
+            var words = text.Split(' ', '\n', '\r', '\t');
+            var hashtags = words
+                .Where(word => !string.IsNullOrEmpty(word) && word.StartsWith('#'))
+                .Select(hashtag => hashtag.TrimEnd('.', ',', '!', '?', ':', ';', ')'))
+                .Where(hashtag => hashtag.Length > 1)
+                .ToArray();
+
+            return hashtags;
+        }
 
         private bool IsPrivateMessage(Message message)
         {
@@ -75,8 +104,6 @@ namespace RaceWriterBot.Handlers
         {
             return message.ReplyToMessage != null;
         }
-
-
 
         private void ProcessPrivateMessage(Message message)
         {
@@ -100,8 +127,6 @@ namespace RaceWriterBot.Handlers
         {
             _userDataStorage.GetUser(message.From.Id).AddTargetChatSession(message.ForwardFromChat.Id, message.ForwardFromChat.Title);
         }
-
-
 
         private void CheckAccess(Message forwardedMessage)
         {

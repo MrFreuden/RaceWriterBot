@@ -1,13 +1,14 @@
-﻿using RaceWriterBot.Enums;
+﻿using RaceWriterBot.Domain.Models;
+using RaceWriterBot.Domain.Models.Old;
+using RaceWriterBot.Enums;
 using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
-using RaceWriterBot.Models;
 using System;
 using System.Net.Sockets;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Handlers
+namespace RaceWriterBot.Infrastructure.Handlers
 {
     public class CallbackQueryHandler
     {
@@ -147,7 +148,7 @@ namespace RaceWriterBot.Handlers
                             break;
 
                         case PageType.Messages:
-                            await _menuManager.HandleActionItem<PostMessagePair>(
+                            await _menuManager.HandleActionItem(
                                 callback.UserId, new PostMessagePair(),
                                 (pair) => _viewManager.ShowMessageDetails(callback.UserId, pair));
                             break;

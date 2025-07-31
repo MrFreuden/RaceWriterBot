@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Handlers
+namespace RaceWriterBot.Infrastructure.Handlers
 {
     public class MessageParser
     {

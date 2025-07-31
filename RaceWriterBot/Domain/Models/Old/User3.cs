@@ -1,9 +1,9 @@
 ﻿using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 
-namespace RaceWriterBot.Models
+namespace RaceWriterBot.Domain.Models.Old
 {
-    public class User
+    public class User3
     {
         private UserSession _userSession;
         private Stack<Menu> _menuHistory;
@@ -23,7 +23,7 @@ namespace RaceWriterBot.Models
             }
         }
 
-        public User(long userId)
+        public User3(long userId)
         {
             _userSession = new UserSession(userId);
             _menuHistory = new Stack<Menu>();
@@ -165,6 +165,10 @@ namespace RaceWriterBot.Models
             _dialogState = null;
         }
 
-        
+        internal string? GetTrackedHashtag(long channelId, string[] hashtags)
+        {
+            var hashtagSessions = GetHashtagSessions(channelId);
+            return hashtags.FirstOrDefault(h => hashtagSessions.Any(s => s.HashtagName == h));
+        }
     }
 }

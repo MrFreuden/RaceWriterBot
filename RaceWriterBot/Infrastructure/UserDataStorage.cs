@@ -1,16 +1,16 @@
-﻿using RaceWriterBot.Interfaces;
-using RaceWriterBot.Models;
+﻿using RaceWriterBot.Domain.Models.Old;
+using RaceWriterBot.Interfaces;
 
 namespace RaceWriterBot.Infrastructure
 {
     public class UserDataStorage : IUserDataStorage
     {
-        private readonly Dictionary<long, User> _users;
+        private readonly Dictionary<long, User3> _users;
 
         public UserDataStorage()
         {
-            _users = new Dictionary<long, User>();
-            var defaultUser = new User(190866300);
+            _users = new Dictionary<long, User3>();
+            var defaultUser = new User3(190866300);
             defaultUser.AddTargetChatSession(-1002633936370, "Test2");
             defaultUser.AddTargetChatSession(-1002633936371, "Test3");
             defaultUser.AddTargetChatSession(-1002633936372, "Test4");
@@ -28,11 +28,11 @@ namespace RaceWriterBot.Infrastructure
         {
             if (!_users.ContainsKey(userId))
             {
-                _users.Add(userId, new User(userId));
+                _users.Add(userId, new User3(userId));
             }
         }
 
-        public User GetUser(long userId)
+        public User3 GetUser(long userId)
         {
             if (_users.TryGetValue(userId, out var user))
             {
@@ -45,6 +45,24 @@ namespace RaceWriterBot.Infrastructure
                 return _users[userId];
             }
             throw new KeyNotFoundException($"User with ID {userId} is not found");
+        }
+
+        public bool TryGetUser(long userId, out User3? user)
+        {
+            if (userId == 0)
+            {
+                user = default;
+                return false;
+            }
+
+            if (_users.TryGetValue(userId, out var user1))
+            {
+                user = user1;
+                return true;
+            }
+
+            user = default;
+            return false;
         }
 
         public void RemoveUser(long userId)

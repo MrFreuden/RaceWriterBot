@@ -1,5 +1,6 @@
-﻿using RaceWriterBot.Interfaces;
-using RaceWriterBot.Models;
+﻿using RaceWriterBot.Domain.Models.Old;
+using RaceWriterBot.Infrastructure.Handlers;
+using RaceWriterBot.Interfaces;
 using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Managers
@@ -22,11 +23,15 @@ namespace RaceWriterBot.Managers
         public bool ProcessDialogMessage(long userId, Message message)
         {
             var dialog = _userDataStorage.GetUser(userId).GetCurrentDialog();
-            return dialog.ExpectedAction switch
+            if (!Enum.TryParse(dialog.ExpectedAction, out CallbackAction action))
             {
-                Constants.CommandNames.ACTION_EDIT_HASHTAG_TEMPLATE => ProcessHashtagTemplateEdit(message),
-                Constants.CommandNames.ACTION_ADD_HASHTAG => ProcessHashtagAdd(message),
-                Constants.CommandNames.ACTION_EDIT_HASHTAG => ProcessHashtagEdit(message),
+                return false;
+            }
+            return action switch
+            {
+                CallbackAction.EditHashtagTemplate => ProcessHashtagTemplateEdit(message),
+                CallbackAction.AddHashtag => ProcessHashtagAdd(message),
+                CallbackAction.EditHashtagName => ProcessHashtagEdit(message),
                 _ => false,
             };
         }

@@ -68,10 +68,9 @@ namespace RaceWriterBot
             var botDataStorage = new BotDataStorage();
 
 
-            var customHandler = new BotHandler(messenger, botDataStorage, userDataStorage, viewManager, menuManger, dialogProcessor);
-            var handler = new UpdateHandlerAdapter(customHandler);
+            var handler = new BotHandler(messenger, botDataStorage, userDataStorage, viewManager, menuManger, dialogProcessor);
             Console.WriteLine("Starting bot...");
-            bot.StartReceiving(handler.HandleUpdateAsync, handler.HandleErrorAsync, cancellationToken: cancellationToken.Token);
+            bot.StartReceiving(handler.HandleUpdateAsync(), handler.HandleErrorAsync, cancellationToken: cancellationToken.Token);
             Console.WriteLine("Bot is running.");
             return bot;
         }

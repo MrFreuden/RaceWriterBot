@@ -1,6 +1,6 @@
 ﻿using RaceWriterBot.Interfaces;
 
-namespace RaceWriterBot.Models
+namespace RaceWriterBot.Domain.Models.Old
 {
     public class DialogState<T> : IDialogState
     {

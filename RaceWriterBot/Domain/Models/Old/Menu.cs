@@ -1,8 +1,9 @@
 ﻿using RaceWriterBot.Enums;
 using RaceWriterBot.Infrastructure;
+using RaceWriterBot.Infrastructure.Handlers;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace RaceWriterBot.Models
+namespace RaceWriterBot.Domain.Models.Old
 {
     public class Menu
     {
@@ -37,7 +38,7 @@ namespace RaceWriterBot.Models
                 rows.Add(currentRow);
             }
 
-            rows.Add([InlineKeyboardButton.WithCallbackData("Назад", $"{Constants.CommandNames.ACTION_BACK}")]);
+            rows.Add([InlineKeyboardButton.WithCallbackData("Назад", $"{CallbackType.Command}_{CallbackAction.Back}")]);
 
             return new InlineKeyboardMarkup(rows);
         }

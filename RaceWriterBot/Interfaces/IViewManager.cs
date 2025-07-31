@@ -1,4 +1,5 @@
-﻿using RaceWriterBot.Models;
+﻿using RaceWriterBot.Domain.Models.Entity;
+using RaceWriterBot.Domain.Models.Old;
 
 namespace RaceWriterBot.Interfaces
 {
@@ -14,5 +15,6 @@ namespace RaceWriterBot.Interfaces
         Task ShowErrorMessage(long chatId);
         Task AddNewHashtag(long userId, long channelId);
         Task StartEditHashtagTemplate(long userId, string hashtagName);
+        Task CommentWithTemplateMessage(long userId, long channelId, string hashtagName);
     }
 }

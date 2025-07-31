@@ -16,32 +16,27 @@ namespace RaceWriterBot.Infrastructure
 
         public async Task<Message> SendMessage(ChatId chatId, string text)
         {
-            var task = await _client.SendMessage(chatId, text);
-            return task;
+            return await _client.SendMessage(chatId, text);
         }
 
         public async Task<Message> SendMessage(ChatId chatId, string text, ReplyMarkup replyMarkup)
         {
-            var task = await _client.SendMessage(chatId, text, replyMarkup: replyMarkup);
-            return task;
+            return await _client.SendMessage(chatId, text, replyMarkup: replyMarkup);
         }
 
         public async Task<Message> EditMessageReplyMarkup(ChatId chatId, int messageId, InlineKeyboardMarkup keyboardMarkup)
         {
-            var task = await _client.EditMessageReplyMarkup(chatId, messageId, keyboardMarkup);
-            return task;
+            return await _client.EditMessageReplyMarkup(chatId, messageId, keyboardMarkup);
         }
 
         public async Task<Message> EditMessageText(ChatId chatId, int messageId, string text)
         {
-            var task = await _client.EditMessageText(chatId, messageId, text);
-            return task;
+            return await _client.EditMessageText(chatId, messageId, text);
         }
 
         public async Task<Message> EditMessageText(ChatId chatId, int messageId, string text, InlineKeyboardMarkup keyboardMarkup)
         {
-            var task = await _client.EditMessageText(chatId, messageId, text, replyMarkup: keyboardMarkup);
-            return task;
+            return await _client.EditMessageText(chatId, messageId, text, replyMarkup: keyboardMarkup);
         }
     }
 

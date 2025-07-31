@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Folder Include="UseCases\" />
+    <Folder Include="Interface\" />
   </ItemGroup>
 
 </Project>

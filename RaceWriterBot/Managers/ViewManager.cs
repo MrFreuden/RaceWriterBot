@@ -1,7 +1,8 @@
-﻿using RaceWriterBot.Enums;
-using RaceWriterBot.Handlers;
+﻿using RaceWriterBot.Domain.Models.Entity;
+using RaceWriterBot.Domain.Models.Old;
+using RaceWriterBot.Enums;
+using RaceWriterBot.Infrastructure.Handlers;
 using RaceWriterBot.Interfaces;
-using RaceWriterBot.Models;
 using System.Threading.Channels;
 using Telegram.Bot.Types;
 
@@ -28,7 +29,8 @@ namespace RaceWriterBot.Managers
                     var menu = new Menu
                     {
                         Text = "У вас немає активних каналів",
-                        ButtonsData = { ["Створити"] = $"{CallbackType.Command}_{CallbackAction.CreateTargetChat}"}
+                        ButtonsData = { ["Створити"] = $"{CallbackType.Command}_{CallbackAction.CreateTargetChat}"},
+                        PageType = PageType.Channels
                     };
                     await _menuManager.ShowMenu(chatId, menu);
                 }
@@ -73,7 +75,8 @@ namespace RaceWriterBot.Managers
                 var menu = new Menu
                 {
                     Text = $"Канал {channel.Name} не має хештегів",
-                    ButtonsData = { ["Створити"] = $"{CallbackType.Command}_{CallbackAction.AddHashtag}_{channel.TargetChatId}" }
+                    ButtonsData = { ["Створити"] = $"{CallbackType.Command}_{CallbackAction.AddHashtag}_{channel.TargetChatId}" },
+                    PageType = PageType.Hashtags
                 };
                 await _menuManager.ShowMenu(userId, menu);
                 return;
@@ -115,6 +118,26 @@ namespace RaceWriterBot.Managers
 
         public async Task ReturnToPreviousMenu(long chatId)
         {
+            var menu = _userDataStorage.GetUser(chatId).GetLastMenu();
+            
+            if (menu.PageType != null)
+            {
+                switch (menu.PageType)
+                {
+                    case PageType.Channels:
+                        await Settings(chatId);
+                        break;
+
+                    case PageType.Hashtags:
+                        await ShowHashtags(chatId,_userDataStorage.GetUser(chatId).GetTargetChatSession(long.Parse(menu.ButtonsData.First().Value.Split('_').Last())));
+                        break;
+
+                    default:
+                        break;
+                }
+                return;
+            }
+            
             await _menuManager.NavigateBack(chatId);
         }
 
@@ -159,6 +182,14 @@ namespace RaceWriterBot.Managers
 
             menu.Text = $"Будь ласка, введіть новий текст шаблону для хештега #{hashtagName}";
             await _menuManager.ShowMenu(userId, menu);
+        }
+
+        public async Task CommentWithTemplateMessage(long userId, long channelId, string hashtagName)
+        {
+            var user = _userDataStorage.GetUser(userId);
+            var hashtag = user.GetHashtagSession(hashtagName);
+
+            await 
         }
     }
 }
