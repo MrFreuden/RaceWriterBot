@@ -1,4 +1,5 @@
 ﻿using RaceWriterBot.Application.Interfaces;
+using RaceWriterBot.Domain.Interfaces;
 using RaceWriterBot.Domain.ValueObjects;
 using RaceWriterBot.Enums;
 using RaceWriterBot.Infrastructure;
@@ -10,22 +11,24 @@ namespace RaceWriterBot.Application.Services
     {
         private readonly IStateRepository _stateRepository;
         private readonly IStateFactory _stateFactory;
+        private readonly IUserRepository _userRepository;
         private readonly Dictionary<InputRequestType, string> messages = new()
         {
             [InputRequestType.HashtagName] = "Введіть новий хештег",
             [InputRequestType.TemplateText] = "Введіть новий текст шаблону хештега"
         };
 
-        public StateService(IStateRepository stateRepository, IStateFactory stateFactory)
+        public StateService(IStateRepository stateRepository, IStateFactory stateFactory, IUserRepository userRepository)
         {
             _stateRepository = stateRepository;
             _stateFactory = stateFactory;
-            
+            _userRepository = userRepository;
         }
 
-        public MessageDTO HandleCallback(string data, UserId userId)
+        public MessageDTO HandleCallback(string callback, UserId userId)
         {
-            var state = _stateFactory.CreateFromCallback(data, userId);
+            var user = _userRepository.GetUser(userId);
+            var state = _stateFactory.CreateFromCallback(callback, user);
             _stateRepository.AddState(userId, state);
             var m = new MessageDTO { UserId = userId, Text = messages[state.GetRequiredInput()], MessageId = 0 };
             return m;

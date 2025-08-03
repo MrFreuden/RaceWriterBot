@@ -1,19 +1,17 @@
 ﻿using RaceWriterBot.Application.Interfaces;
 using RaceWriterBot.Domain.Interfaces;
-using RaceWriterBot.Domain.ValueObjects;
+using RaceWriterBot.Domain.Models.Entity;
 
 namespace RaceWriterBot.Domain.States
 {
     public class StateFactory : IStateFactory
     {
-        private readonly IUserRepository _userRepository;
-
-        public StateFactory(IUserRepository userRepository)
+        public StateFactory()
         {
-            _userRepository = userRepository;
+
         }
 
-        public IState CreateFromCallback(string? callbackData, UserId userId)
+        public IState CreateFromCallback(string? callbackData, User user)
         {
             if (callbackData == null || string.IsNullOrEmpty(callbackData))
                 throw new ArgumentException("Некорректные данные запроса");
@@ -25,8 +23,11 @@ namespace RaceWriterBot.Domain.States
 
             return stateType switch
             {
-                CommandNames.EDIT_HASHTAG => new EditHashtagState(_userRepository, userId, parts),
-                CommandNames.ADD_HASHTAG => new AddHashtagState(_userRepository, userId, parts),
+                CommandNames.EDIT_HASHTAG => new EditHashtagState(user, parts),
+                CommandNames.ADD_HASHTAG => new AddHashtagState(user, parts),
+                CommandNames.EDIT_HASHTAG_TEMPLATE => new EditHashtagTemplateState(user, parts),
+                CommandNames.ADD_TARGET_CHAT => new AddTargetChatState(user),
+                //CommandNames.CONFIRMATION_ADDING_BOT => AddingBotAsAdminState()
 
                 _ => throw new ArgumentException($"Неизвестная команда: {stateType}")
             };
@@ -41,7 +42,7 @@ namespace RaceWriterBot.Domain.States
         public const string EDIT_HASHTAG_TEMPLATE = "EditHashtagTemplate";
         public const string ADD_HASHTAG = "AddHashtag";
         public const string EDIT_HASHTAG = "EditHashtag";
-        public const string CREATE_TARGET_CHAT = "CreateTargetChat";
+        public const string ADD_TARGET_CHAT = "AddTargetChat";
         public const string CONFIRMATION_ADDING_BOT = "UserConfirmAddingBotToTargetChat";
     }
 }

@@ -21,7 +21,7 @@ namespace RaceWriterBot.Presentation.Handlers
         {
             var userId = new UserId(query.From.Id);
             var response = _stateService.HandleCallback(query.Data, userId);
-            await _messageSender.EditMessageText(response);
+            var message = await _messageSender.SendMessage(response);
         }
     }
 }

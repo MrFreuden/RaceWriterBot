@@ -4,5 +4,7 @@
     {
         HashtagName,
         TemplateText,
+        ForwardedMessage,
+        AddBotToChat
     }
 }

@@ -5,13 +5,12 @@ using RaceWriterBot.Enums;
 
 namespace RaceWriterBot.Domain.States
 {
-    public class EditHashtagState : IState
+    internal class EditHashtagTemplateState : IState
     {
         private readonly User _user;
-        private readonly TargetChatId _chatId;
+        private readonly TargetChatId _targetChatId;
         private readonly HashtagName _hashtagName;
-
-        public EditHashtagState(User user, string[] arguments)
+        public EditHashtagTemplateState(User user, string[] arguments)
         {
             if (arguments.Length != 4)
                 throw new ArgumentException();
@@ -20,16 +19,16 @@ namespace RaceWriterBot.Domain.States
                 throw new ArgumentException();
 
             _user = user;
-            _chatId = new TargetChatId(chatId);
+            _targetChatId = new TargetChatId(chatId);
             _hashtagName = new HashtagName(arguments[3]);
         }
 
-        public Task ExecuteAsync(string newHashtagName)
+        public Task ExecuteAsync(string input)
         {
-            _user.UpdateHashtagName(_chatId, _hashtagName, new HashtagName(newHashtagName));
+            _user.UpdateHashtagTemplateText(_targetChatId, _hashtagName, input);
             return Task.CompletedTask;
         }
 
-        public InputRequestType GetRequiredInput() => InputRequestType.HashtagName;
+        public InputRequestType GetRequiredInput() => InputRequestType.TemplateText;
     }
 }
