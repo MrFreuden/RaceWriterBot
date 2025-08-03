@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Presentation\Services\" />
     <Folder Include="UseCases\" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿using RaceWriterBot.Presentation.Handlers;
+﻿using RaceWriterBot.Enums;
 
 namespace RaceWriterBot.Domain.Interfaces
 {

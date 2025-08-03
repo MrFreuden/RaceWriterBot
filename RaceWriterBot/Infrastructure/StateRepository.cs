@@ -1,6 +1,6 @@
-﻿using RaceWriterBot.Domain.Interfaces;
+﻿using RaceWriterBot.Application.Interfaces;
+using RaceWriterBot.Domain.Interfaces;
 using RaceWriterBot.Domain.ValueObjects;
-using RaceWriterBot.Presentation.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

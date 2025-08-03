@@ -5,7 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Presentation.Handlers
+namespace RaceWriterBot.Infrastructure.Bot
 {
     public class BotHandler : IUpdateHandler
     {

@@ -1,7 +1,7 @@
 ﻿using RaceWriterBot.Domain.Interfaces;
 using RaceWriterBot.Domain.ValueObjects;
 
-namespace RaceWriterBot.Presentation.Interfaces
+namespace RaceWriterBot.Application.Interfaces
 {
     public interface IStateFactory
     {

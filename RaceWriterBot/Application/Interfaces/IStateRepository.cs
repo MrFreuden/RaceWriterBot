@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RaceWriterBot.Presentation.Interfaces
+namespace RaceWriterBot.Application.Interfaces
 {
     public interface IStateRepository
     {
