@@ -1,6 +1,4 @@
 ﻿using RaceWriterBot.Application.Interfaces;
-using RaceWriterBot.Interfaces;
-using RaceWriterBot.Managers;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -9,12 +7,12 @@ namespace RaceWriterBot.Infrastructure.Bot
 {
     public class BotHandler : IUpdateHandler
     {
-        private IMessageHandler _updateProcessor;
+        private IMessageHandler _messageHandler;
         private ICallbackQueryHandler _callbackQueryHandler;
 
         public BotHandler(IMessageHandler messageHandler, ICallbackQueryHandler callbackQueryHandler)
         {
-            _updateProcessor = messageHandler;
+            _messageHandler = messageHandler;
             _callbackQueryHandler = callbackQueryHandler;
         }
 
@@ -24,9 +22,9 @@ namespace RaceWriterBot.Infrastructure.Bot
             await (update switch
             {
                 //{ ChannelPost: { } post } => _updateProcessor.ProcessPost(post),
-                { Message: { } message } => _updateProcessor.ProcessMessage(message),
+                { Message: { } message } => _messageHandler.ProcessMessage(message),
                 //{ EditedMessage: { } message } => _updateProcessor.ProcessEditMessage(message),
-                { MyChatMember: { } myChatMember } => _updateProcessor.ProcessChatMember(myChatMember),
+                //{ MyChatMember: { } myChatMember } => _messageHandler.ProcessChatMember(myChatMember),
                 { CallbackQuery: { } callbackQuery } => _callbackQueryHandler.ProcessCallbackQuery(callbackQuery),
                 //{ InlineQuery: { } inlineQuery } => OnInlineQuery(inlineQuery),
                 //{ ChosenInlineResult: { } chosenInlineResult } => OnChosenInlineResult(chosenInlineResult),

@@ -1,6 +1,7 @@
 ﻿using RaceWriterBot.Domain.Interfaces;
 using RaceWriterBot.Domain.Models.Entity;
 using RaceWriterBot.Domain.ValueObjects;
+using RaceWriterBot.Infrastructure.Exceptions;
 
 namespace RaceWriterBot.Infrastructure
 {

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Application.Interfaces
 {
     public interface IMessageHandler
     {
+        Task ProcessMessage(Message message);
     }
 }

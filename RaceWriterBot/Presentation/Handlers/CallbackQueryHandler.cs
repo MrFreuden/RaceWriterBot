@@ -1,4 +1,5 @@
-﻿using RaceWriterBot.Domain.Models.Entity;
+﻿using RaceWriterBot.Application.Interfaces;
+using RaceWriterBot.Domain.Models.Entity;
 using RaceWriterBot.Domain.ValueObjects;
 using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Presentation.Interfaces;
@@ -6,7 +7,7 @@ using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Presentation.Handlers
 {
-    public class CallbackQueryHandler
+    public class CallbackQueryHandler : ICallbackQueryHandler
     {
         private readonly IMessageSender _messageSender;
         private readonly IStateService _stateService;

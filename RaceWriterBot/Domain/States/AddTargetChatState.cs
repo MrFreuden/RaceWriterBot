@@ -1,6 +1,5 @@
 ﻿using RaceWriterBot.Domain.Interfaces;
 using RaceWriterBot.Domain.Models.Entity;
-using RaceWriterBot.Domain.ValueObjects;
 using RaceWriterBot.Enums;
 
 namespace RaceWriterBot.Domain.States
@@ -16,7 +15,7 @@ namespace RaceWriterBot.Domain.States
 
         public Task ExecuteAsync(string input)
         {
-            
+            throw new NotImplementedException();
         }
 
         public InputRequestType GetRequiredInput() => InputRequestType.AddBotToChat;

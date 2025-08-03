@@ -12,6 +12,10 @@ namespace RaceWriterBot.Infrastructure
     internal class StateRepository : IStateRepository
     {
         private readonly Dictionary<UserId, IState> _states;
+        public StateRepository()
+        {
+            _states = new Dictionary<UserId, IState>();
+        }
 
         public StateRepository(Dictionary<UserId, IState> states)
         {
