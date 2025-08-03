@@ -8,12 +8,12 @@ namespace RaceWriterBot.Managers
 {
     public class MenuManager
     {
-        private readonly IBotMessenger _botMessenger;
+        private readonly IMessageSender _botMessenger;
         private readonly IUserDataStorage _userDataStorage;
         private const int _countObjectsPerPage = 3;
 
 
-        public MenuManager(IBotMessenger botMessenger, IUserDataStorage userDataStorage)
+        public MenuManager(IMessageSender botMessenger, IUserDataStorage userDataStorage)
         {
             _botMessenger = botMessenger;
             _userDataStorage = userDataStorage;

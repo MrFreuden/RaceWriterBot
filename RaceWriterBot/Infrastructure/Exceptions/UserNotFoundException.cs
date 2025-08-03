@@ -1,5 +1,4 @@
-﻿
-namespace RaceWriterBot.Infrastructure
+﻿namespace RaceWriterBot.Infrastructure.Exceptions
 {
     [Serializable]
     internal class UserNotFoundException : Exception

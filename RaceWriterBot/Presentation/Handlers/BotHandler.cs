@@ -1,12 +1,11 @@
 ﻿using RaceWriterBot.Application.Interfaces;
-using RaceWriterBot.Infrastructure;
 using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Infrastructure.Handlers
+namespace RaceWriterBot.Presentation.Handlers
 {
     public class BotHandler : IUpdateHandler
     {

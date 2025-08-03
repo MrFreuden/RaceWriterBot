@@ -3,18 +3,18 @@ using RaceWriterBot.Interfaces;
 using RaceWriterBot.Managers;
 using Telegram.Bot.Types;
 
-namespace RaceWriterBot.Infrastructure.Handlers
+namespace RaceWriterBot.Presentation.Handlers
 {
     public class MessageHandler
     {
         private readonly IUserDataStorage _userDataStorage;
         private readonly IBotDataStorage _botStorage;
-        private readonly IBotMessenger _botMessenger;
+        private readonly IMessageSender _botMessenger;
         private readonly IDialogProcessor _dialogProcessor;
         private readonly IViewManager _viewManager;
 
         public MessageHandler(
-            IBotMessenger botMessenger,
+            IMessageSender botMessenger,
             IUserDataStorage userDataStorage,
             IBotDataStorage botDataStorage, IViewManager viewManager)
         {

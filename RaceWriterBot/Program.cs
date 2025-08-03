@@ -60,7 +60,7 @@ namespace RaceWriterBot
         private static TelegramBotClient ConfigureBot(string apiToken, CancellationTokenSource cancellationToken)
         {
             var bot = new TelegramBotClient(apiToken);
-            var messenger = new BotMessenger(bot);
+            var messenger = new MessageSender(bot);
             var userDataStorage = new UserDataStorage();
             var menuManger = new MenuManager(messenger, userDataStorage);
             var viewManager = new ViewManager(menuManger, userDataStorage);

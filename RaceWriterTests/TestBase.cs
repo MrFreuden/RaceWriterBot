@@ -10,7 +10,7 @@ namespace RaceWriterTests
 {
     public abstract class TestBase
     {
-        protected Mock<IBotMessenger> mockMessenger;
+        protected Mock<IMessageSender> mockMessenger;
         protected Mock<IUserDataStorage> mockUserStorage;
         protected Mock<IBotDataStorage> mockBotStorage;
         protected IUpdateHandler handler;
@@ -24,7 +24,7 @@ namespace RaceWriterTests
         [SetUp]
         public void Setup()
         {
-            mockMessenger = new Mock<IBotMessenger>();
+            mockMessenger = new Mock<IMessageSender>();
             mockUserStorage = new Mock<IUserDataStorage>();
             mockBotStorage = new Mock<IBotDataStorage>();
             var customHandler = new BotHandler(mockMessenger.Object, mockBotStorage.Object, mockUserStorage.Object);

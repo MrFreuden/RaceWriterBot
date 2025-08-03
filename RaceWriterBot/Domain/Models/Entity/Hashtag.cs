@@ -29,7 +29,7 @@ namespace RaceWriterBot.Domain.Models.Entity
         public void EditTemplateText(string templateText)
         {
             if (string.IsNullOrEmpty(templateText))
-                throw new NotImplementedException();
+                throw new ArgumentNullException(nameof(templateText));
 
             TemplateText = templateText;
         }
