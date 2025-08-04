@@ -1,5 +1,5 @@
-﻿using RaceWriterBot.Domain.ValueObjects;
-using RaceWriterBot.Infrastructure;
+﻿using RaceWriterBot.Application.DTOs;
+using RaceWriterBot.Domain.ValueObjects;
 
 namespace RaceWriterBot.Presentation.Interfaces
 {

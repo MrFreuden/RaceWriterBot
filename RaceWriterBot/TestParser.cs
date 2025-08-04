@@ -1,15 +1,9 @@
 ﻿using System.Text.RegularExpressions;
-using Telegram.Bot.Types;
 
 namespace RaceWriterBot.Presentation.Handlers
 {
-    public class MessageParser
+    public class TestParser
     {
-        private async Task ParseMessage(Message message)
-        {
-            throw new NotImplementedException();
-        }
-
         private (string Name, List<string> Slots)? ParseSmart(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return null;

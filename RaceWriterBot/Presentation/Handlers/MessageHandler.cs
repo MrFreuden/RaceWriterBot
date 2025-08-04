@@ -1,4 +1,5 @@
 ﻿using RaceWriterBot.Application.Interfaces;
+using RaceWriterBot.Domain.ValueObjects;
 using RaceWriterBot.Infrastructure;
 using Telegram.Bot.Types;
 
@@ -6,16 +7,18 @@ namespace RaceWriterBot.Presentation.Handlers
 {
     public class MessageHandler : IMessageHandler
     {
-        private readonly IMessageSender _botMessenger;
+        private readonly IMessageSender _messageSender;
+        private readonly IMessageParser _messageParser;
 
-        public MessageHandler(IMessageSender botMessenger)
+        public MessageHandler(IMessageSender messageSender)
         {
-            _botMessenger = botMessenger;
+            _messageSender = messageSender;
         }
 
-        public Task ProcessMessage(Message message)
+        public async Task ProcessMessage(Message message)
         {
-            return Task.CompletedTask;
+            var response = _messageParser.HandleMessage(message);
+            var m = await _messageSender.SendMessage(response);
         }
 
         private string[] ParseHashtagFromText(string text)
@@ -33,26 +36,6 @@ namespace RaceWriterBot.Presentation.Handlers
                 .ToArray();
 
             return hashtags;
-        }
-
-        private bool IsPrivateMessage(Message message)
-        {
-            return message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private;
-        }
-
-        private bool IsForwardedMessage(Message message)
-        {
-            return message.ForwardFromChat != null;
-        }
-
-        private bool IsReplyToPostMessage(Message message)
-        {
-            return message.ReplyToMessage != null;
-        }
-
-        private void ProcessPrivateMessage(Message message)
-        {
-            
         }
     }
 }

@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="Domain">
+    <Position X="10.1" Y="1.258" Height="0.367" Width="0.7" />
+  </Comment>
+  <Comment CommentText="Infrastr">
+    <Position X="5.608" Y="1.242" Height="0.367" Width="0.7" />
+  </Comment>
+  <Comment CommentText="Present">
+    <Position X="3.033" Y="1.233" Height="0.367" Width="0.7" />
+  </Comment>
+  <Comment CommentText="Applicat">
+    <Position X="7.65" Y="1.25" Height="0.367" Width="0.7" />
+  </Comment>
+  <Class Name="RaceWriterBot.Application.Services.EventService" Collapsed="true">
+    <Position X="7.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Application\Services\EventService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Application.Services.StateService" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="7.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAgAAgAAAAAAAAAAAAAAAAAAAQBAAAAAAAAAAA=</HashCode>
+      <FileName>Application\Services\StateService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Domain.Models.Entity.Event" Collapsed="true">
+    <Position X="12" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAEAAAAAAAAIAAAAAAAAEAAQAAAAAAFA=</HashCode>
+      <FileName>Domain\Models\Entity\Event.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Domain.Models.Entity.Hashtag" Collapsed="true">
+    <Position X="12" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAQAAAAEAQAAAAgAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Domain\Models\Entity\Hashtag.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Domain.Models.Entity.PostMessagePair" Collapsed="true">
+    <Position X="12" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Domain\Models\Entity\PostMessagePair.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Domain.Models.Entity.TargetChat" Collapsed="true">
+    <Position X="12" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAgEAAAAQAAIAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Domain\Models\Entity\TargetChat.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Domain.Models.Entity.TimeSlot" Collapsed="true">
+    <Position X="12" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAAAAAAAAAAAQAAAkAAIAAAAAAAgAYEAAQA=</HashCode>
+      <FileName>Domain\Models\Entity\TimeSlot.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Domain.Models.Entity.User" Collapsed="true">
+    <Position X="12" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAggAAAAgAAAACBAAAAAAAAAAAAMA=</HashCode>
+      <FileName>Domain\Models\Entity\User.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Domain.States.AddHashtagState" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="14" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAIQAAAAAAAAAAEA=</HashCode>
+      <FileName>Domain\States\AddHashtagState.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Domain.States.AddTargetChatState" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="13.75" Y="3" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQAAAAAAAAAAEA=</HashCode>
+      <FileName>Domain\States\AddTargetChatState.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Domain.States.EditHashtagState" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="14" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAACAAIQAAAAAAAAAAEA=</HashCode>
+      <FileName>Domain\States\EditHashtagState.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Domain.States.EditHashtagTemplateState" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="13.75" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAIQABAAAAAAAAEA=</HashCode>
+      <FileName>Domain\States\EditHashtagTemplateState.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Domain.States.StateFactory" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Domain\States\StateFactory.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Domain.ValueObjects.Registration" Collapsed="true">
+    <Position X="12" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAwBAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Domain\ValueObjects\Registration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Infrastructure.Bot.BotHandler" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="5.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAGAQAAAAAAAAAAAAAAAAAACAAAAAAACAA=</HashCode>
+      <FileName>Infrastructure\Bot\BotHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Orientation="Bottom" Position="0.375" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Infrastructure.MessageSender" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="5.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAEAAACAAAAAAAgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Infrastructure\MessageSender.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Infrastructure.StateRepository" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAABAAAAAAAQAAAACAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Infrastructure\StateRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Infrastructure.UserRepository" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAgEAAAAAAAAAA=</HashCode>
+      <FileName>Infrastructure\UserRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Presentation.Handlers.CallbackQueryHandler" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="2.5" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>Presentation\Handlers\CallbackQueryHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Presentation.Handlers.MessageHandler" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="2.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAAEAAAIAAAAAAEAAAA=</HashCode>
+      <FileName>Presentation\Handlers\MessageHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="RaceWriterBot.Presentation.Handlers.MessageParser" Collapsed="true">
+    <Position X="7.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAA=</HashCode>
+      <FileName>Presentation\Handlers\MessageParser.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="RaceWriterBot.Program" Collapsed="true">
+    <Position X="0.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACMAAAAAAAAAAAABAAAAAgAAAAAAEAAAAAAABAAQAAI=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RaceWriterBot.Infrastructure.MessageDTO" Collapsed="true">
+    <Position X="7.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Infrastructure\MessageDTO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="RaceWriterBot.Application.Interfaces.ICallbackQueryHandler" Collapsed="true">
+    <Position X="0.75" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Application\Interfaces\ICallbackQueryHandler.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Application.Interfaces.IMessageHandler" Collapsed="true">
+    <Position X="4.25" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Application\Interfaces\IMessageHandler.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Application.Interfaces.IStateFactory" Collapsed="true">
+    <Position X="4" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Application\Interfaces\IStateFactory.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Application.Interfaces.IStateRepository" Collapsed="true">
+    <Position X="0.75" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAAAAAAQAAAACAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Application\Interfaces\IStateRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Domain.Interfaces.IEventRepository" Collapsed="true">
+    <Position X="2.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Domain\Interfaces\IEventRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Domain.Interfaces.IState" Collapsed="true">
+    <Position X="2.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAEA=</HashCode>
+      <FileName>Domain\Interfaces\IState.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Domain.Interfaces.IUserRepository" Collapsed="true">
+    <Position X="4.25" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgEAAAAAAAAAA=</HashCode>
+      <FileName>Domain\Interfaces\IUserRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Infrastructure.IMessageSender" Collapsed="true">
+    <Position X="0.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Infrastructure\MessageSender.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="RaceWriterBot.Presentation.Interfaces.IStateService" Collapsed="true">
+    <Position X="2.5" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Presentation\Interfaces\IStateService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="RaceWriterBot.Enums.InputRequestType" Collapsed="true">
+    <Position X="15" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAQAAAAAAAAAAAAAAAAoAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>Enums\InputRequestType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RaceWriterBot.Enums.PageType" Collapsed="true">
+    <Position X="16.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAQAAEAA=</HashCode>
+      <FileName>Enums\PageType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RaceWriterBot.Enums.PaginationAction" Collapsed="true">
+    <Position X="18.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Enums\PaginationAction.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

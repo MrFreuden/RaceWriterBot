@@ -1,5 +1,6 @@
 ﻿using RaceWriterBot.Domain.Interfaces;
 using RaceWriterBot.Domain.Models.Entity;
+using RaceWriterBot.Domain.ValueObjects;
 using RaceWriterBot.Enums;
 
 namespace RaceWriterBot.Domain.States

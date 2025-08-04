@@ -1,7 +1,6 @@
-﻿using RaceWriterBot.Domain.ValueObjects;
+﻿using RaceWriterBot.Application.DTOs;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace RaceWriterBot.Infrastructure
 {
@@ -44,14 +43,6 @@ namespace RaceWriterBot.Infrastructure
         }
 
         
-    }
-    public class MessageDTO
-    {
-        public UserId UserId { get; set; }
-        public string? Text { get; set; }
-        public int? MessageId { get; set; }
-        public ReplyMarkup? ReplyMarkup { get; set; }
-        public InlineKeyboardMarkup? InlineKeyboardMarkup { get; set; }
     }
     public interface IMessageSender
     {
