@@ -1,6 +1,8 @@
 ﻿using RaceWriterBot.Application.Interfaces;
 using RaceWriterBot.Domain.Interfaces;
+using RaceWriterBot.Domain.Models;
 using RaceWriterBot.Domain.Models.Entity;
+using RaceWriterBot.Enums;
 
 namespace RaceWriterBot.Domain.States
 {
@@ -34,6 +36,17 @@ namespace RaceWriterBot.Domain.States
         }
     }
 
+    public class PagingState : IState
+    {
+        List<MenuAction> _actions;
+        public Task ExecuteAsync(IStateInput input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public InputRequestType GetRequiredInput() => InputRequestType.PaginationAction;
+    }
+
     public static class CommandNames
     {
         public const string Start = "/start";
@@ -44,5 +57,6 @@ namespace RaceWriterBot.Domain.States
         public const string EDIT_HASHTAG = "EditHashtag";
         public const string ADD_TARGET_CHAT = "AddTargetChat";
         public const string CONFIRMATION_ADDING_BOT = "UserConfirmAddingBotToTargetChat";
+        public const string PAGING = "Paging";
     }
 }

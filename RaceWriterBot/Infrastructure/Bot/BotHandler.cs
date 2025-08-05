@@ -24,7 +24,7 @@ namespace RaceWriterBot.Infrastructure.Bot
                 //{ ChannelPost: { } post } => _updateProcessor.ProcessPost(post),
                 { Message: { } message } => _messageHandler.ProcessMessage(message),
                 //{ EditedMessage: { } message } => _updateProcessor.ProcessEditMessage(message),
-                //{ MyChatMember: { } myChatMember } => _messageHandler.ProcessChatMember(myChatMember),
+                { MyChatMember: { } myChatMember } => _messageHandler.ProcessChatMember(myChatMember),
                 { CallbackQuery: { } callbackQuery } => _callbackQueryHandler.ProcessCallbackQuery(callbackQuery),
                 //{ InlineQuery: { } inlineQuery } => OnInlineQuery(inlineQuery),
                 //{ ChosenInlineResult: { } chosenInlineResult } => OnChosenInlineResult(chosenInlineResult),

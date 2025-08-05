@@ -15,6 +15,12 @@ namespace RaceWriterBot.Presentation.Handlers
             _messageSender = messageSender;
         }
 
+        public async Task ProcessChatMember(ChatMemberUpdated myChatMember)
+        {
+            var response = _messageParser.HandleChatMember(myChatMember);
+            var m = await _messageSender.SendMessage(response);
+        }
+
         public async Task ProcessMessage(Message message)
         {
             var response = _messageParser.HandleMessage(message);

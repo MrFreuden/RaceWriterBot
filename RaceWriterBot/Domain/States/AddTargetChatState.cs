@@ -14,9 +14,13 @@ namespace RaceWriterBot.Domain.States
             _user = user;
         }
 
-        public Task ExecuteAsync(string input)
+        public Task ExecuteAsync(IStateInput input)
         {
-            throw new NotImplementedException();
+            if (input is ChatMemberInput memberInput) 
+            { 
+                _user.AddTargetChat(memberInput.Member.)
+            }
+            return Task.CompletedTask;
         }
 
         public InputRequestType GetRequiredInput() => InputRequestType.AddBotToChat;

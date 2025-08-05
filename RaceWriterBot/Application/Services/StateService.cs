@@ -31,6 +31,7 @@ namespace RaceWriterBot.Application.Services
             var state = _stateFactory.CreateFromCallback(callback, user);
             _stateRepository.AddState(userId, state);
             var m = new MessageDTO { UserId = userId, Text = messages[state.GetRequiredInput()], MessageId = 0 };
+            
             return m;
         }
     }

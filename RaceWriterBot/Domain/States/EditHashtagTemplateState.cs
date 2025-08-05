@@ -23,9 +23,9 @@ namespace RaceWriterBot.Domain.States
             _hashtagName = new HashtagName(arguments[3]);
         }
 
-        public Task ExecuteAsync(string input)
+        public Task ExecuteAsync(StringInput input)
         {
-            _user.UpdateHashtagTemplateText(_targetChatId, _hashtagName, input);
+            _user.UpdateHashtagTemplateText(_targetChatId, _hashtagName, input.Value);
             return Task.CompletedTask;
         }
 

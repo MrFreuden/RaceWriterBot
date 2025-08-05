@@ -5,6 +5,8 @@
         HashtagName,
         TemplateText,
         ForwardedMessage,
-        AddBotToChat
+        AddBotToChat,
+        Text,
+        PaginationAction,
     }
 }

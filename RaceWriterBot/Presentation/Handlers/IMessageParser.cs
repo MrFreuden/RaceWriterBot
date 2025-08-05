@@ -5,6 +5,7 @@ namespace RaceWriterBot.Presentation.Handlers
 {
     public interface IMessageParser
     {
+        MessageDTO HandleChatMember(ChatMemberUpdated myChatMember);
         MessageDTO HandleMessage(Message message);
     }
 }
